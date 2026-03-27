@@ -1,0 +1,2576 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AiTrainer">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Astrokuzey — Kişiselleştirilmiş fitness uygulaması. Ücretsiz, internet gerekmez.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>AiTrainer — AI Personal Fitness Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══ RESET & ROOT ═══ */
+:root{
+  --bg:#0a0a0a;--surf:#161616;--surf2:#1e1e1e;--border:#2a2a2a;
+  --accent:#e8ff3c;--accent2:#ff4c1f;--text:#f0f0f0;--sub:#aaa;--muted:#777;
+  --done-bg:#162208;--done-border:#3a6a1a;
+  --max-w:680px;--sidebar:280px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:-webkit-fill-available}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'DM Sans',system-ui,sans-serif;
+  min-height:100vh;overflow-x:hidden;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+/* ═══ DESKTOP LAYOUT ═══ */
+@media(min-width:900px){
+  body{display:grid;grid-template-columns:var(--sidebar) 1fr;grid-template-rows:auto 1fr;min-height:100vh}
+  .hdr{grid-column:1;grid-row:1/3;border-right:1px solid var(--border);border-bottom:none;
+    flex-direction:column;align-items:flex-start;justify-content:flex-start;
+    padding:32px 24px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .hdr-right{margin-top:auto;padding-top:20px;flex-direction:column;align-items:flex-start;gap:8px;width:100%}
+  .icon-btn.lang-btn,.icon-btn#settingsBtn{width:100%;justify-content:flex-start;padding:0 14px;gap:8px;touch-action:manipulation}
+  .hdr-divider{display:block}
+  .app-main{grid-column:2;grid-row:1/3;overflow-y:auto;max-width:none}
+  .screen{max-width:none}
+  .onboard,.wizard,.gen-screen-inner{max-width:var(--max-w);margin:0 auto;padding:40px 32px}
+  .panel{max-width:var(--max-w);margin:0 auto}
+  .tabs{justify-content:flex-start;padding:0 32px;max-width:calc(var(--max-w) + 64px);margin:0 auto}
+  .modal{border-radius:12px;margin:auto;margin-bottom:0}
+  .hdr-nav{display:flex;flex-direction:column;gap:6px;margin-top:32px;width:100%}
+  .hdr-nav-item{background:none;border:1px solid transparent;color:var(--muted);padding:10px 12px;
+    border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;text-align:left;
+    font-family:"DM Sans",sans-serif;transition:all .2s;display:flex;align-items:center;gap:8px}
+  .hdr-nav-item:hover{background:var(--surf);color:var(--text);border-color:var(--border)}
+  .hdr-nav-item.active{background:var(--surf2);color:var(--accent);border-color:var(--accent)}
+}
+@media(max-width:899px){
+  /* Reset grid to normal flow on mobile */
+  body{display:block !important}
+  .hdr{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .hdr-right{flex-direction:row;align-items:center;margin-top:0;padding-top:0}
+  .icon-btn.lang-btn,.icon-btn#settingsBtn{width:auto;justify-content:center;padding:0 12px}
+  .hdr-nav,.hdr-divider{display:none}
+  .app-main{width:100%;display:block}
+}
+
+/* ═══ HEADER ═══ */
+.hdr{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;gap:10px;background:var(--bg)}
+.hdr-left .hdr-tag{font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:3px}
+.hdr-left .hdr-title{font-family:"Bebas Neue",sans-serif;font-size:clamp(30px,7vw,52px);line-height:.9}
+.hdr-left .hdr-title span{color:var(--accent)}
+.hdr-tagline{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.4;display:none}
+@media(min-width:900px){.hdr-tagline{display:block}}
+.hdr-right{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.hdr-divider{height:1px;background:var(--border);margin:20px 0;width:100%}
+.icon-btn{background:var(--surf2);border:1px solid var(--border);color:var(--sub);
+  width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+  font-family:"DM Sans",sans-serif;font-weight:700;white-space:nowrap}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.lang-btn{width:auto;padding:0 12px;font-size:12px;letter-spacing:.5px;gap:6px}
+#settingsBtn{display:none}
+
+/* ═══ APP MAIN ═══ */
+.app-main{width:100%;min-height:100vh}
+
+/* ═══ SCREENS ═══ */
+.screen{display:none;flex-direction:column}
+.screen.active{display:flex}
+
+/* ═══ ONBOARD ═══ */
+.onboard{padding:24px 20px;max-width:var(--max-w)}
+.ob-hero{font-size:clamp(22px,4vw,32px);font-weight:800;line-height:1.15;margin-bottom:8px}
+.ob-sub{font-size:14px;color:var(--sub);line-height:1.65;margin-bottom:22px}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:22px}
+@media(min-width:600px){.features{grid-template-columns:repeat(4,1fr)}}
+.feat{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:14px}
+.feat-icon{font-size:22px;margin-bottom:5px}
+.feat-title{font-size:13px;font-weight:700;margin-bottom:2px;color:var(--text)}
+.feat-sub{font-size:12px;color:var(--sub)}
+.start-btn{background:var(--accent);color:#0a0a0a;font-weight:800;font-size:16px;border:none;
+  padding:15px 32px;border-radius:6px;cursor:pointer;width:100%;font-family:"DM Sans",sans-serif;
+  transition:transform .1s;touch-action:manipulation}
+.start-btn:active{transform:scale(.98)}
+.legal-note{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.6;text-align:center}
+
+/* ═══ WIZARD ═══ */
+.wizard{padding:20px;max-width:var(--max-w);flex:1;display:flex;flex-direction:column}
+.wiz-progress{height:3px;background:var(--border);border-radius:3px;margin-bottom:24px}
+.wiz-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width .4s}
+.step-num{font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+.step-q{font-size:clamp(18px,4vw,24px);font-weight:800;line-height:1.2;margin-bottom:4px;color:var(--text)}
+.step-hint{font-size:13px;color:var(--sub);margin-bottom:20px;line-height:1.55}
+.opts{display:flex;flex-direction:column;gap:8px}
+@media(min-width:600px){.opts.opts-2col{display:grid;grid-template-columns:1fr 1fr}}
+.opt{background:var(--surf);border:2px solid var(--border);border-radius:8px;padding:14px 16px;
+  cursor:pointer;text-align:left;display:flex;align-items:center;gap:13px;width:100%;transition:all .15s;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.opt:hover{border-color:#555;background:var(--surf2)}
+.opt.selected{border-color:var(--accent);background:#1c2200}
+.opt-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s;color:transparent}
+.opt.selected .opt-check{background:var(--accent);border-color:var(--accent);color:#000;font-weight:800}
+.opt-label{font-size:14px;font-weight:700;color:var(--text)}
+.opt-sub{font-size:12px;color:var(--sub);margin-top:2px}
+/* INPUT */
+.inp-wrap{margin-bottom:16px}
+.inp-row{display:flex;gap:12px;flex-wrap:wrap}
+.inp-field{flex:1;min-width:120px}
+.inp-label{font-size:11px;letter-spacing:2px;color:var(--sub);text-transform:uppercase;margin-bottom:7px;display:block;font-weight:600}
+.inp{width:100%;background:var(--surf);border:2px solid var(--border);color:var(--text);
+  padding:13px 14px;border-radius:8px;font-size:17px;outline:none;transition:border .2s;
+  font-family:"DM Sans",sans-serif;font-weight:500;-webkit-appearance:none}
+.inp:focus{border-color:var(--accent)}
+.inp::placeholder{color:var(--muted)}
+.inp-hint{font-size:11px;color:var(--muted);margin-top:5px}
+/* WEIGHT TARGET */
+.weight-target{background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  padding:14px;margin-top:12px;display:none}
+.weight-target.show{display:block}
+.weight-target-lbl{font-size:12px;color:var(--sub);margin-bottom:8px;font-weight:600}
+.wiz-nav{display:flex;gap:10px;margin-top:22px;padding-bottom:24px}
+.nav-back{background:none;border:2px solid var(--border);color:var(--sub);padding:12px 18px;
+  border-radius:6px;cursor:pointer;font-size:13px;font-family:"DM Sans",sans-serif;font-weight:600}
+.nav-next{background:var(--accent);color:#000;border:none;padding:12px 24px;border-radius:6px;
+  cursor:pointer;font-size:14px;font-weight:800;margin-left:auto;font-family:"DM Sans",sans-serif;
+  touch-action:manipulation}
+.nav-next:disabled{opacity:.3;cursor:not-allowed}
+
+/* ═══ GENERATING ═══ */
+.gen-screen{padding:60px 20px;align-items:center;justify-content:center;text-align:center;flex:1}
+.gen-spinner{width:52px;height:52px;border:3px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gen-title{font-family:"Bebas Neue",sans-serif;font-size:30px;margin-bottom:6px}
+.gen-status{font-size:13px;color:var(--sub)}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;padding:0 16px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:13px 12px;
+  cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;
+  background:none;border-top:none;border-left:none;border-right:none;transition:all .2s;font-family:"DM Sans",sans-serif}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ═══ PANELS ═══ */
+.panel{display:none;padding:20px}
+.panel.active{display:block}
+
+/* ═══ DAY PANEL ═══ */
+.day-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.day-name{font-family:"Bebas Neue",sans-serif;font-size:clamp(30px,7vw,48px);line-height:1}
+.day-focus{font-size:10px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-top:3px;font-weight:700}
+.day-prog-num{font-family:"Bebas Neue",sans-serif;font-size:26px;color:var(--accent);line-height:1;text-align:right}
+.day-prog-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.prog-bar{height:3px;background:var(--border);border-radius:3px;margin-bottom:18px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:3px;transition:width .4s;width:0}
+.sec-lbl{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted);text-transform:uppercase;
+  padding-bottom:7px;border-bottom:1px solid var(--border);margin:16px 0 8px}
+
+/* ═══ EXERCISE ═══ */
+.ex{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:12px 14px;
+  margin-bottom:8px;position:relative;overflow:hidden;transition:background .2s,border-color .2s}
+.ex-stripe{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);
+  transform:scaleY(0);transition:transform .2s;transform-origin:center}
+.ex.done .ex-stripe{transform:scaleY(1);background:var(--done-border)}
+.ex.done{background:var(--done-bg);border-color:var(--done-border)}
+.ex-tap{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;touch-action:manipulation;padding:2px 0}
+.ex-name{flex:1;font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
+.ex.done .ex-name{color:var(--muted)}
+.ex.done .ex-name-text{text-decoration:line-through}
+.ex-sets{font-family:"Bebas Neue",sans-serif;font-size:18px;color:var(--accent);white-space:nowrap;flex-shrink:0}
+.ex.done .ex-sets{color:var(--done-border)}
+.chk{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;
+  align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .2s;
+  color:transparent;background:transparent}
+.ex.done .chk{background:var(--done-border);border-color:var(--done-border);color:#fff}
+.ex-note{font-size:12px;color:var(--sub);margin-top:6px;line-height:1.5}
+.optimal-badge{font-size:9px;font-weight:700;letter-spacing:1px;background:var(--accent);
+  color:#000;border-radius:3px;padding:2px 6px;text-transform:uppercase;vertical-align:middle}
+/* MUSCLE BARS */
+.muscle-bars{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding:10px 12px;
+  background:var(--surf2);border-radius:6px}
+.muscle-row{display:flex;align-items:center;gap:8px}
+.muscle-name{font-size:11px;color:var(--sub);width:130px;flex-shrink:0}
+.muscle-bar-bg{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.muscle-bar-fill{height:100%;border-radius:3px}
+.muscle-pct{font-size:10px;color:var(--muted);width:30px;text-align:right;flex-shrink:0}
+.ex-footer{display:flex;align-items:center;gap:8px;margin-top:8px}
+.swap-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;
+  padding:5px 10px;border-radius:4px;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all .15s}
+.swap-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ═══ TIP ═══ */
+.tip{background:var(--surf2);border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:8px;padding:12px 14px;margin:12px 0}
+.tip-lbl{font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:4px;font-weight:700}
+.tip-txt{font-size:13px;color:var(--sub);line-height:1.65}
+
+/* ═══ COMPLETE BANNER ═══ */
+.complete-banner{display:none;background:linear-gradient(135deg,#1a3a0a,#0d2208);
+  border:1px solid var(--done-border);border-radius:12px;padding:24px;text-align:center;margin:14px 0}
+.complete-banner.show{display:block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.cb-emoji{font-size:44px;margin-bottom:8px}
+.cb-title{font-family:"Bebas Neue",sans-serif;font-size:30px;color:var(--accent);letter-spacing:1px}
+.cb-sub{font-size:13px;color:var(--sub);margin-top:4px;line-height:1.6}
+.cb-stats{display:flex;justify-content:center;gap:32px;margin-top:16px}
+.cb-stat-val{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--accent);line-height:1}
+.cb-stat-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.reset-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;
+  padding:8px 14px;border-radius:6px;cursor:pointer;margin-top:14px;font-family:"DM Sans",sans-serif;transition:all .2s}
+.reset-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* ═══ NUTRITION ═══ */
+.macro-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.macro-card{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.macro-val{font-family:"Bebas Neue",sans-serif;font-size:24px;color:var(--accent);line-height:1}
+.macro-unit{font-size:10px;color:var(--sub)}
+.macro-lbl{font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.macro-card.kcal .macro-val{color:var(--accent2)}
+.meal{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:13px 14px;margin-bottom:8px}
+.meal-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.meal-badge{font-size:11px;font-weight:700;background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:2px 8px;color:var(--sub)}
+.meal-name{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text)}
+.meal-items{font-size:13px;color:var(--sub);line-height:1.75}
+.meal-items strong{color:var(--text);font-weight:600}
+.meal-items em{color:var(--muted);font-style:normal}
+
+/* ═══ PROFILE ═══ */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.stat-val{font-family:"Bebas Neue",sans-serif;font-size:24px;color:var(--accent);line-height:1}
+.stat-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.profile-card{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
+.profile-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.profile-row:last-child{border-bottom:none}
+.profile-key{font-size:12px;color:var(--sub)}
+.profile-val{font-size:13px;font-weight:700;color:var(--text)}
+.profile-val.highlight{color:var(--accent2)}
+.action-btn{border:none;padding:13px 20px;border-radius:6px;cursor:pointer;font-size:13px;
+  font-weight:700;width:100%;margin-top:8px;font-family:"DM Sans",sans-serif;transition:all .15s}
+.action-btn.danger{background:var(--accent2);color:#fff}
+.action-btn.ghost{background:none;border:1px solid var(--border);color:var(--sub)}
+
+/* ═══ CARDIO ═══ */
+.cardio-card{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:24px;text-align:center;margin-bottom:14px}
+.cardio-title{font-family:"Bebas Neue",sans-serif;font-size:28px;margin-bottom:3px}
+.cardio-sub{font-size:12px;color:var(--sub)}
+.cardio-stats{display:flex;justify-content:center;gap:28px;margin-top:16px}
+.cardio-stat-val{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--accent);line-height:1}
+.cardio-stat-lbl{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.cardio-var{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:13px 14px;margin-bottom:8px}
+.cardio-var-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px;gap:8px}
+.cardio-var-title{font-size:13px;font-weight:700}
+.cardio-var-sub{font-size:11px;color:var(--muted);white-space:nowrap}
+.cardio-var-detail{font-size:12px;color:var(--sub);line-height:1.55}
+
+/* ═══ DISCLAIMER / LEGAL ═══ */
+.disclaimer{background:var(--surf2);border:1px solid var(--border);border-left:3px solid var(--accent2);
+  border-radius:8px;padding:14px;margin:16px 0;font-size:12px;color:var(--sub);line-height:1.7}
+.disclaimer strong{color:var(--text)}
+.disclaimer-title{font-size:10px;letter-spacing:2px;color:var(--accent2);text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.ai-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surf2);border:1px solid var(--border);
+  border-radius:20px;padding:4px 12px;font-size:11px;color:var(--muted);margin-bottom:12px}
+
+/* ═══ FOOTER ═══ */
+.app-footer{padding:24px 20px;border-top:1px solid var(--border);margin-top:32px}
+.footer-links{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.footer-link{font-size:12px;color:var(--muted);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:"DM Sans",sans-serif}
+.footer-link:hover{color:var(--sub)}
+.footer-copy{font-size:11px;color:var(--muted);line-height:1.6}
+
+/* ═══ MODALS ═══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;display:none;align-items:flex-end;justify-content:center;pointer-events:none}
+.modal-overlay.open{pointer-events:auto}
+.modal-overlay.open{display:flex;pointer-events:auto}
+@media(min-width:600px){.modal-overlay{align-items:center}}
+.modal{background:var(--surf);border:1px solid var(--border);border-radius:16px 16px 0 0;
+  padding:22px 20px 32px;width:100%;max-width:540px;max-height:88vh;overflow-y:auto;animation:slideUp .28s ease}
+@media(min-width:600px){.modal{border-radius:12px;margin-bottom:0}}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-family:"Bebas Neue",sans-serif;font-size:22px;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--sub);margin-bottom:16px}
+.modal-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.modal-opt{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:13px 15px;
+  cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;
+  width:100%;transition:all .15s}
+.modal-opt:hover{border-color:var(--accent)}
+.modal-opt-left{display:flex;flex-direction:column;gap:2px}
+.modal-opt-title{font-size:14px;font-weight:700;color:var(--text)}
+.modal-opt-sub{font-size:12px;color:var(--sub)}
+.modal-cancel{background:none;border:1px solid var(--border);color:var(--sub);padding:12px;
+  border-radius:6px;cursor:pointer;font-size:13px;width:100%;font-family:"DM Sans",sans-serif;font-weight:600}
+/* SWAP MODAL */
+/* ═══ MEAL CARDS ═══ */
+.meal-card{background:var(--surf);border:1px solid var(--border);border-radius:8px;
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;touch-action:manipulation}
+.meal-card:hover{border-color:var(--accent);background:var(--surf2)}
+.meal-card:active{transform:scale(.99)}
+.meal-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.meal-card-icon{font-size:24px;flex-shrink:0}
+.meal-card-info{flex:1}
+.meal-card-label{font-size:14px;font-weight:700;color:var(--text)}
+.meal-card-time{font-size:11px;color:var(--muted);margin-top:1px}
+.meal-card-kcal{text-align:right;flex-shrink:0}
+.meal-kcal-num{font-family:"Bebas Neue",sans-serif;font-size:22px;color:var(--accent2);line-height:1}
+.meal-kcal-lbl{font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.meal-card-arrow{font-size:20px;color:var(--muted);flex-shrink:0;padding-left:4px}
+.meal-card-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.meal-card-desc{font-size:12px;color:var(--sub);margin-bottom:8px;line-height:1.5}
+.meal-macro-pills{display:flex;gap:6px;flex-wrap:wrap}
+.mpill{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+.mpill-p{background:#1a2e3a;color:#7fc8e8}
+.mpill-c{background:#2a2a0a;color:#c8c850}
+.mpill-f{background:#2a1a0a;color:#c89050}
+.meal-tag{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--surf2);
+  color:var(--muted);border:1px solid var(--border)}
+.swap-ex{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:13px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.swap-ex:hover{border-color:var(--accent)}
+.swap-ex.is-current{border-color:#444;cursor:default;opacity:.65}
+.swap-ex-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.swap-ex-name{font-size:13px;font-weight:700;flex:1}
+.swap-ex-sets{font-family:"Bebas Neue",sans-serif;font-size:16px;color:var(--accent)}
+.swap-ex-note{font-size:12px;color:var(--sub);margin-bottom:7px;line-height:1.4}
+.swap-mr{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.swap-mn{font-size:11px;color:var(--sub);width:120px;flex-shrink:0}
+.swap-mbg{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.swap-mf{height:100%;border-radius:2px}
+.swap-mp{font-size:10px;color:var(--muted);width:30px;text-align:right}
+/* LEGAL MODAL */
+.legal-content{font-size:13px;color:var(--sub);line-height:1.8}
+.legal-content h3{font-size:14px;color:var(--text);margin:16px 0 6px;font-weight:700}
+.legal-content p{margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- HEADER / SIDEBAR -->
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-tag">AI Personal Fitness Coach</div>
+    <div class="hdr-title" style="font-size:clamp(26px,6vw,44px)"><span style="color:var(--accent)">Ai</span>Trainer</div>
+    <div class="hdr-tagline">Kişiselleştirilmiş antrenman ve<br>beslenme programı oluşturucu</div>
+  </div>
+  <!-- Desktop nav (visible only on PC) -->
+  <nav class="hdr-nav" id="desktopNav" style="display:none"></nav>
+  <div class="hdr-divider"></div>
+  <div class="hdr-right">
+    <button class="icon-btn lang-btn" id="langBtn" onclick="toggleLang()">🌐 TR</button>
+    <button class="icon-btn" id="settingsBtn" onclick="openSettings()">⚙️ Settings</button>
+  </div>
+</header>
+
+<!-- APP MAIN -->
+<main class="app-main">
+
+<!-- ONBOARD -->
+<!-- LANGUAGE SELECT -->
+<div class="screen active" id="s-lang">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 24px;background:var(--bg)">
+    <div style="max-width:380px;width:100%;text-align:center">
+      <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 20px">🤖</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1;margin-bottom:6px"><span style="color:var(--accent)">Ai</span>Trainer</div>
+      <div style="font-size:13px;color:var(--sub);margin-bottom:32px;line-height:1.6">Your AI-powered personal fitness coach.<br>Choose your language to get started.</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div onclick="setLang('en')" style="background:var(--surf);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .18s;touch-action:manipulation" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:28px">🇬🇧</span>
+          <div style="text-align:left"><div style="font-size:16px;font-weight:700">English</div><div style="font-size:12px;color:var(--sub);margin-top:2px">Continue in English</div></div>
+        </div>
+        <div onclick="setLang('tr')" style="background:var(--surf);border:2px solid var(--border);border-radius:var(--radius);padding:18px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:all .18s;touch-action:manipulation" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+          <span style="font-size:28px">🇹🇷</span>
+          <div style="text-align:left"><div style="font-size:16px;font-weight:700">Türkçe</div><div style="font-size:12px;color:var(--sub);margin-top:2px">Continue in Turkish</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="s-onboard">
+  <div class="onboard">
+    <div style="margin-bottom:14px">
+      <div class="ai-badge">✨ AI Powered</div>
+    </div>
+    <div class="ob-hero">Your personal fitness program,<br>in seconds.</div>
+    <div class="ob-sub">Enter your stats, goal, and equipment. Get your workout and nutrition plan instantly. Completely free, works offline, saved on your device.</div>
+    <div class="features">
+      <div class="feat"><div class="feat-icon">🏋️</div><div class="feat-title">Smart Training</div><div class="feat-sub">Goal-optimized exercises</div></div>
+      <div class="feat"><div class="feat-icon">🥗</div><div class="feat-title">Nutrition Plan</div><div class="feat-sub">Macro-calculated meals</div></div>
+      <div class="feat"><div class="feat-icon">🔄</div><div class="feat-title">Swap Exercises</div><div class="feat-sub">With muscle group analysis</div></div>
+      <div class="feat"><div class="feat-icon">💾</div><div class="feat-title">Saved Locally</div><div class="feat-sub">No account needed</div></div>
+    </div>
+    <button class="start-btn" onclick="startWizard()">Build My Program →</button>
+    <div class="legal-note">By continuing you accept our <button class="footer-link" onclick="event.stopPropagation();openLegal('terms')">Terms of Use</button>'nı ve <button class="footer-link" onclick="event.stopPropagation();openLegal('disclaimer')">Disclaimer</button>'ni kabul . AI-generated content — not medical advice.</div>
+  </div>
+</div>
+
+<!-- WIZARD -->
+<div class="screen" id="s-wizard">
+  <div class="wizard">
+    <div class="wiz-progress"><div class="wiz-fill" id="wizFill"></div></div>
+    <div id="wizContent"></div>
+    <div class="wiz-nav">
+      <button class="nav-back" id="btnBack" onclick="wizBack()">← Geri</button>
+      <button class="nav-next" id="btnNext" onclick="wizNext()" disabled>Devam →</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATING -->
+<div class="screen" id="s-generating">
+  <div class="gen-screen">
+    <div class="gen-spinner"></div>
+    <div class="gen-title">Building Your Program</div>
+    <div class="gen-status" id="genStatus">Verilerini analiz ediyorum...</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="s-app">
+  <div class="tabs" id="appTabs"></div>
+  <div id="appPanels"></div>
+</div>
+
+</main><!-- /app-main -->
+
+<!-- ═══ MODALS ═══ -->
+<!-- SETTINGS -->
+<div class="modal-overlay" id="settingsModal" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-title">Settings</div>
+    <div class="modal-sub">What would you like to change?</div>
+    <div class="modal-opts">
+      <button class="modal-opt" onclick="editSingle('goal')"><div class="modal-opt-left"><div class="modal-opt-title">Change Goal</div><div class="modal-opt-sub">Bulk, cut, recomp...</div></div><span>🎯</span></button>
+      <button class="modal-opt" onclick="editSingle('target_weight')"><div class="modal-opt-left"><div class="modal-opt-title">Target Weight</div><div class="modal-opt-sub">Track your goal progress</div></div><span>⚖️</span></button>
+      <button class="modal-opt" onclick="editSingle('intensity')"><div class="modal-opt-left"><div class="modal-opt-title">Workout Intensity</div><div class="modal-opt-sub">Short / Balanced / Full session</div></div><span>⚡</span></button>
+      <button class="modal-opt" onclick="editSingle('days')"><div class="modal-opt-left"><div class="modal-opt-title">Training Days</div><div class="modal-opt-sub">2-5 days per week</div></div><span>📅</span></button>
+      <button class="modal-opt" onclick="editSingle('equipment')"><div class="modal-opt-left"><div class="modal-opt-title">Equipment</div><div class="modal-opt-sub">Gym / Cables / Dumbbells / Bodyweight</div></div><span>🏋️</span></button>
+      <button class="modal-opt" onclick="editSingle('cardio')"><div class="modal-opt-left"><div class="modal-opt-title">Cardio Type</div><div class="modal-opt-sub">Run, HIIT, walk, swim...</div></div><span>🏃</span></button>
+      <button class="modal-opt" onclick="editSingle('meals')"><div class="modal-opt-left"><div class="modal-opt-title">Meals per Day</div><div class="modal-opt-sub">3 / 4 / 5 meals</div></div><span>🥗</span></button>
+      <button class="modal-opt" onclick="editSingle('body')"><div class="modal-opt-left"><div class="modal-opt-title">Update Height / Weight</div><div class="modal-opt-sub">Recalculates all calories</div></div><span>📏</span></button>
+      <button class="modal-opt" style="border-color:rgba(255,107,107,.25)" onclick="fullReset()"><div class="modal-opt-left"><div class="modal-opt-title" style="color:var(--accent3)">Full Reset</div><div class="modal-opt-sub">Delete all data and start over</div></div><span style="color:var(--accent3)">🗑️</span></button>
+    </div>
+    <button class="modal-cancel" onclick="closeSettings()">Cancel</button>
+  </div>
+</div>
+
+<!-- EDIT -->
+<div class="modal-overlay" id="editModal" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div id="editContent"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="modal-cancel" style="flex:1" onclick="closeEdit()">Cancel</button>
+      <button class="nav-next" style="flex:2;margin-left:0" id="editSaveBtn" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SWAP -->
+<div class="modal-overlay" id="swapModal" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-title" id="swapTitle">Swap Exercises</div>
+    <div class="modal-sub" id="swapSub"></div>
+    <div id="swapContent"></div>
+    <button class="modal-cancel" style="margin-top:12px" onclick="closeSwap()">Cancel</button>
+  </div>
+</div>
+
+<!-- LEGAL -->
+<div class="modal-overlay" id="legalModal" onclick="closeModalBg(event)">
+  <div class="modal" id="legalContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DİL
+// ═══════════════════════════════════════════════
+// lang alias for compatibility
+const TR={
+  'Üst Göğüs':'Üst Göğüs','Alt Göğüs':'Alt Göğüs','Göğüs':'Göğüs','İç Göğüs':'İç Göğüs',
+  'Orta Omuz':'Orta Omuz','Ön Omuz':'Ön Omuz','Lateral Omuz':'Yan Omuz','Arka Omuz':'Arka Omuz',
+  'Triceps Long Head':'Triceps İç Kafa','Triceps Lateral':'Triceps Dış Kafa','Triceps':'Triceps',
+  'Lat (Geniş Sırt)':'Geniş Sırt','Orta Sırt':'Orta Sırt','Alt Sırt':'Alt Sırt',
+  'Biceps':'Pazı (Biceps)','Brachialis':'Ön Kol Üstü','Biceps Long Head':'Pazı Uzun Kafa',
+  'Ön Kol':'Ön Kol','Trapez':'Trapez','Dış Rotator':'Dış Rotator','Rhomboid':'Sırt Orta Kası',
+  'Quadriceps':'Ön Bacak (Quadriceps)','Glute':'Kalça','Hamstring':'Arka Bacak (Hamstring)',
+  'Gastrocnemius':'Baldır Üst','Soleus':'Baldır Alt','Diz Çevresi':'Diz Çevresi',
+  'Üst Karın':'Üst Karın','Alt Karın':'Alt Karın','Oblique':'Yan Karın',
+  'Core (genel)':'Karın Bölgesi','Hip Flexor':'Kalça Kasları','Lat':'Geniş Sırt',
+  'Cardio':'Kardiyovasküler','Core':'Karın','Omuz':'Omuz','Sırt':'Sırt'
+};
+function muscleName(n){return appLang==='tr'?(TR[n]||n):n;}
+
+
+
+
+
+
+// ═══════════════════════════════════════════════
+// YASAL METİNLER
+// ═══════════════════════════════════════════════
+function openLegal(type){
+  const texts={
+    disclaimer:`<div class="modal-title">⚠️ Disclaimer</div>
+      <div class="legal-content">
+        <h3>Tıbbi Tavsiye Değildir</h3>
+        <p>Astrokuzey tarafından sunulan antrenman programları, beslenme planları ve kalori hesaplamaları <strong>genel bilgilendirme amaçlıdır</strong> ve herhangi bir tıbbi tavsiye, teşhis veya tedavi yerine geçmez.</p>
+        <h3>Yapay Zeka ile Oluşturulmuştur</h3>
+        <p>Bu uygulama tarafından oluşturulan programlar <strong>yapay zeka algoritmaları</strong> kullanılarak genel fitness prensipleri doğrultusunda hazırlanmaktadır. Bireysel sağlık durumunuzu, tıbbi geçmişinizi veya özel ihtiyaçlarınızı dikkate almaz.</p>
+        <h3>Kullanıcı Sorumluluğu</h3>
+        <p>Herhangi bir egzersiz veya diyet programına başlamadan önce <strong>bir doktor veya uzman diyetisyenle görüşmenizi</strong> öneririz. Uygulanan programdan doğacak her türlü sonuç kullanıcının kendi sorumluluğundadır.</p>
+        <h3>Sağlık Uyarısı</h3>
+        <p>Kronik hastalığınız, yaralanmanız veya sağlık probleminiz varsa bu uygulamayı kullanmadan önce sağlık uzmanınıza danışın. Egzersiz sırasında ağrı veya rahatsızlık hissederseniz hemen durdurun.</p>
+        <p><strong>Astrokuzey ve geliştiricileri, bu uygulama kullanımından kaynaklanabilecek herhangi bir zarar, kayıp veya sağlık sorunlarından sorumlu tutulamaz.</strong></p>
+      </div>
+      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">Anladım</button>`,
+    terms:`<div class="modal-title">📋 Terms of Use</div>
+      <div class="legal-content">
+        <h3>Kabul</h3>
+        <p>Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
+        <h3>Kullanım Amacı</h3>
+        <p>Astrokuzey yalnızca <strong>kişisel, ticari olmayan</strong> amaçlarla kullanılabilir. Uygulama içeriğinin izinsiz kopyalanması, dağıtılması veya ticari amaçlarla kullanılması yasaktır.</p>
+        <h3>Yapay Zeka Kullanımı</h3>
+        <p>Programlar yapay zeka ile oluşturulur. <strong>Sonuçların doğruluğu garanti edilmez.</strong> Kullanıcı, oluşturulan programları kendi takdirine ve uzman görüşüne göre değerlendirmelidir.</p>
+        <h3>Veri Gizliliği</h3>
+        <p>Girdiğiniz boy, kilo, yaş gibi veriler <strong>yalnızca cihazınızda saklanır</strong> (localStorage). Sunucuya gönderilmez, üçüncü taraflarla paylaşılmaz.</p>
+        <h3>Değişiklikler</h3>
+        <p>Bu koşullar önceden bildirim yapılmaksızın güncellenebilir. Uygulamayı kullanmaya devam etmek güncel koşulları kabul etmek anlamına gelir.</p>
+        <h3>Sorumluluk Sınırı</h3>
+        <p>Uygulama "olduğu gibi" sunulmaktadır. Geliştiriciler, kullanımdan doğabilecek doğrudan veya dolaylı zararlardan sorumlu değildir.</p>
+      </div>
+      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">Anladım</button>`,
+    privacy:`<div class="modal-title">🔒 Privacy Policy Politikası</div>
+      <div class="legal-content">
+        <h3>Toplanan Veriler</h3>
+        <p>Astrokuzey yalnızca sizin girdiğiniz verileri (boy, kilo, yaş, hedef vb.) işler. Bu veriler <strong>cihazınızda localStorage'da saklanır.</strong></p>
+        <h3>Veri Paylaşımı</h3>
+        <p>Verileriniz hiçbir sunucuya gönderilmez, üçüncü taraflarla paylaşılmaz, reklam amacıyla kullanılmaz.</p>
+        <h3>Veri Silme</h3>
+        <p>Ayarlar menüsündeki "Tamamen Sıfırla" butonu ile tüm verilerinizi istediğiniz zaman silebilirsiniz. Tarayıcı önbelleğini temizlemek de tüm verileri siler.</p>
+        <h3>Çerezler</h3>
+        <p>Bu uygulama çerez (cookie) kullanmaz. Yalnızca localStorage kullanılır.</p>
+      </div>
+      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">Anladım</button>`
+  };
+  document.getElementById('legalContent').innerHTML=texts[type]||texts.disclaimer;
+  document.getElementById('legalModal').classList.add('open');
+}
+function closeLegal(){
+  document.getElementById('legalModal').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════
+// SORULAR
+// ═══════════════════════════════════════════════
+const STEPS=[
+  // ── BASIC INFO ──────────────────────────────────
+  {id:'name',type:'text',
+    q:()=>appLang==='tr'?'Adın ne?':'What is your name?',
+    hint:()=>appLang==='tr'?'Sana nasıl hitap edeyim?':'How should I address you?',
+    fields:[{id:'name',label:()=>appLang==='tr'?'Adın':'Your name',placeholder:'e.g. Alex',inputmode:'text'}]},
+
+  {id:'body',type:'text',
+    q:()=>appLang==='tr'?'Boy ve kilonu gir':'Enter your height & weight',
+    hint:()=>appLang==='tr'?'Doğru kalori hesabı için gerçek değerleri gir.':'Use your current measurements for accurate calorie calculation.',
+    fields:[
+      {id:'height',label:()=>appLang==='tr'?'Boy (cm)':'Height (cm)',placeholder:'175',inputmode:'decimal',min:100,max:250},
+      {id:'weight',label:()=>appLang==='tr'?'Kilo (kg)':'Weight (kg)',placeholder:'75',inputmode:'decimal',min:30,max:300}
+    ]},
+
+  {id:'age',type:'text',
+    q:()=>appLang==='tr'?'Kaç yaşındasın?':'How old are you?',
+    hint:()=>appLang==='tr'?'Metabolizma ve toparlanma hızı için.':'Affects metabolism and recovery rate.',
+    fields:[{id:'age',label:()=>appLang==='tr'?'Yaş':'Age',placeholder:'25',inputmode:'numeric',min:13,max:100}]},
+
+  {id:'gender',type:'single',
+    q:()=>appLang==='tr'?'Biyolojik cinsiyet?':'Biological sex?',
+    hint:()=>appLang==='tr'?'Kalori ve hormon hesabı için gerekli.':'Required for accurate calorie and hormone calculations.',
+    opts:()=>[
+      {v:'male',label:appLang==='tr'?'Erkek':'Male'},
+      {v:'female',label:appLang==='tr'?'Kadın':'Female'}
+    ]},
+
+  // ── LIFESTYLE ───────────────────────────────────
+  {id:'activity_level',type:'single',
+    q:()=>appLang==='tr'?'Günlük yaşamın ne kadar aktif?':'How active is your daily life?',
+    hint:()=>appLang==='tr'?'Antrenman dışında — işte ve evde. Bu TDEE hesabını doğrudan etkiler.':'Outside of training — at work and home. This directly affects your TDEE.',
+    opts:()=>[
+      {v:'sedentary',  label:appLang==='tr'?'Masa başı / Hareketsiz':'Sedentary / Desk job',         sub:appLang==='tr'?'Çoğunlukla oturuyorum, az yürüyorum':'Mostly sitting, little walking'},
+      {v:'light',      label:appLang==='tr'?'Hafif Aktif':'Lightly Active',                           sub:appLang==='tr'?'Günde 4000-6000 adım, ara ara hareket':'4000-6000 steps/day, occasional movement'},
+      {v:'moderate',   label:appLang==='tr'?'Orta Aktif':'Moderately Active',                         sub:appLang==='tr'?'Günde 7000-10000 adım, aktif iş veya çok yürüyorum':'7000-10000 steps/day, active job or lots of walking'},
+      {v:'very_active',label:appLang==='tr'?'Çok Aktif':'Very Active',                               sub:appLang==='tr'?'Fiziksel iş, inşaat, spor koçu vb.':'Physical job, construction, sports coach etc.'},
+    ]},
+
+  {id:'sleep',type:'single',
+    q:()=>appLang==='tr'?'Genellikle kaç saat uyuyorsun?':'How many hours do you sleep per night?',
+    hint:()=>appLang==='tr'?'Uyku kalitesi kas büyümesini ve toparlanmayı doğrudan etkiler. Dürüst ol.':'Sleep quality directly affects muscle growth and recovery. Be honest.',
+    opts:()=>[
+      {v:'poor',   label:appLang==='tr'?'5 saatten az':'Less than 5 hours',     sub:appLang==='tr'?'Çok az — toparlanma ciddi şekilde etkilenir':'Very low — recovery severely impacted'},
+      {v:'low',    label:appLang==='tr'?'5–6 saat':'5–6 hours',                 sub:appLang==='tr'?'Az — yoğun antrenman önerilmez':'Low — intense training not recommended'},
+      {v:'ok',     label:appLang==='tr'?'7–8 saat':'7–8 hours',                 sub:appLang==='tr'?'İdeal — kas büyümesi için optimal':'Ideal — optimal for muscle growth'},
+      {v:'great',  label:appLang==='tr'?'8 saatten fazla':'More than 8 hours',  sub:appLang==='tr'?'Çok iyi — toparlanma maksimum':'Excellent — maximum recovery'},
+    ]},
+
+  // ── SPORTS BACKGROUND ───────────────────────────
+  {id:'sport_history',type:'multi',
+    q:()=>appLang==='tr'?'Daha önce hangi sporları yaptın?':'What sports have you done before?',
+    hint:()=>appLang==='tr'?'Birden fazla seçebilirsin. Hareket verimliliğini anlamak için önemli.':'Select all that apply. Helps understand your movement efficiency.',
+    opts:()=>[
+      {v:'none',         label:appLang==='tr'?'Hiç spor yapmadım':'No sports background'},
+      {v:'gym',          label:appLang==='tr'?'Ağırlık antrenmanı':'Weight training'},
+      {v:'football',     label:appLang==='tr'?'Futbol / Takım sporları':'Football / Team sports'},
+      {v:'martial_arts', label:appLang==='tr'?'Dövüş sporları':'Martial arts'},
+      {v:'running',      label:appLang==='tr'?'Koşu / Atletizm':'Running / Athletics'},
+      {v:'swimming',     label:appLang==='tr'?'Yüzme':'Swimming'},
+      {v:'cycling',      label:appLang==='tr'?'Bisiklet':'Cycling'},
+      {v:'yoga',         label:appLang==='tr'?'Yoga / Pilates':'Yoga / Pilates'},
+      {v:'other',        label:appLang==='tr'?'Diğer':'Other'},
+    ]},
+
+  // ── GOAL ────────────────────────────────────────
+  {id:'goal',type:'single',showTarget:true,
+    q:()=>appLang==='tr'?'Ana hedefin ne?':'What is your main goal?',
+    hint:()=>appLang==='tr'?'Bu seçim kalori miktarını ve antrenman odağını belirler.':'This determines your calorie target and training focus.',
+    opts:()=>[
+      {v:'bulk',        label:appLang==='tr'?'💪 Kas & Hacim Kazan':'💪 Build Muscle & Size',         sub:appLang==='tr'?'Bakımın +350 kcal — temiz bulk':'Maintenance +350 kcal — clean bulk'},
+      {v:'cut',         label:appLang==='tr'?'🔥 Yağ Yak, Kas Koru':'🔥 Burn Fat, Keep Muscle',        sub:appLang==='tr'?'Bakımın −450 kcal — kas koruyarak':'Maintenance −450 kcal — preserve muscle'},
+      {v:'gain_weight', label:appLang==='tr'?'⬆️ Kilo Al':'⬆️ Gain Weight',                           sub:appLang==='tr'?'Bakımın +500 kcal — genel kilo artışı':'Maintenance +500 kcal — general weight gain'},
+      {v:'lose_weight', label:appLang==='tr'?'⬇️ Kilo Ver':'⬇️ Lose Weight',                          sub:appLang==='tr'?'Bakımın −600 kcal — sağlıklı kilo kaybı':'Maintenance −600 kcal — healthy weight loss'},
+      {v:'recomp',      label:appLang==='tr'?'⚖️ Yağ Yak + Kas Yap':'⚖️ Recomposition',              sub:appLang==='tr'?'Bakım kalorisi — yavaş ama sürdürülebilir':'Maintenance calories — slow but sustainable'},
+      {v:'maintain',    label:appLang==='tr'?'✅ Formda Kal':'✅ Stay Fit',                            sub:appLang==='tr'?'Forma girmek ve korumak':'Get and stay in shape'},
+    ]},
+
+  // ── FOCUS MUSCLES ───────────────────────────────
+  {id:'focus_muscles',type:'multi',
+    q:()=>appLang==='tr'?'Hangi kas gruplarına öncelik vermek istiyorsun?':'Which muscle groups do you want to prioritize?',
+    hint:()=>appLang==='tr'?'Program bu kaslara daha fazla hacim verecek. Max 3 seç.':'Your program will add extra volume for these muscles. Choose up to 3.',
+    opts:()=>[
+      {v:'chest',    label:appLang==='tr'?'Göğüs (dolgunluk)':'Chest (fullness)'},
+      {v:'back',     label:appLang==='tr'?'Sırt (V-taper genişliği)':'Back (V-taper width)'},
+      {v:'shoulders',label:appLang==='tr'?'Omuz (genişlik & yuvarlak)':'Shoulders (width & roundness)'},
+      {v:'arms',     label:appLang==='tr'?'Kollar (biceps & triceps)':'Arms (biceps & triceps)'},
+      {v:'legs',     label:appLang==='tr'?'Bacak (kalça & quad)':'Legs (glutes & quads)'},
+      {v:'core',     label:appLang==='tr'?'Core & Karın':'Core & Abs'},
+      {v:'balanced', label:appLang==='tr'?'Dengeli genel gelişim':'Balanced overall development'},
+    ]},
+
+  // ── TRAINING PREFS ──────────────────────────────
+  {id:'level',type:'single',
+    q:()=>appLang==='tr'?'Fitness geçmişin nasıl?':'What is your fitness background?',
+    hint:()=>appLang==='tr'?'Hareket seçimi ve set/tekrar sayıları buna göre ayarlanır.':'Exercise selection and sets/reps are calibrated to this.',
+    opts:()=>[
+      {v:'beginner',     label:appLang==='tr'?'Yeni Başlıyorum':'Beginner',       sub:appLang==='tr'?'0–6 ay, temel hareketleri öğreniyorum':'0–6 months, learning the fundamentals'},
+      {v:'intermediate', label:appLang==='tr'?'Orta Seviye':'Intermediate',       sub:appLang==='tr'?'6 ay – 2 yıl, temelleri biliyorum':'6 months – 2 years, know the basics'},
+      {v:'advanced',     label:appLang==='tr'?'İleri Seviye':'Advanced',          sub:appLang==='tr'?'2+ yıl düzenli antrenman':'2+ years consistent training'},
+    ]},
+
+  {id:'intensity',type:'single',
+    q:()=>appLang==='tr'?'Antrenmanın ne kadar sürsün?':'How long do you want to train?',
+    hint:()=>appLang==='tr'?'Günde kaç egzersiz yapacağını belirler.':'Determines exercises per session.',
+    opts:()=>[
+      {v:'light',  label:appLang==='tr'?'Kısa & Odaklı':'Short & Focused',  sub:appLang==='tr'?'~4 egzersiz, 30-40 dk':'~4 exercises, 30-40 min'},
+      {v:'medium', label:appLang==='tr'?'Dengeli':'Balanced',                sub:appLang==='tr'?'~6 egzersiz, 45-60 dk':'~6 exercises, 45-60 min'},
+      {v:'heavy',  label:appLang==='tr'?'Kapsamlı':'Full Session',           sub:appLang==='tr'?'~8 egzersiz, 60-75 dk':'~8 exercises, 60-75 min'},
+    ]},
+
+  {id:'days',type:'single',
+    q:()=>appLang==='tr'?'Haftada kaç gün antrenman yapabilirsin?':'How many days per week can you train?',
+    hint:()=>appLang==='tr'?'Program bölünmesi (split) buna göre belirlenir.':'Determines your training split structure.',
+    opts:()=>[
+      {v:'2',label:appLang==='tr'?'2 Gün':'2 Days',sub:appLang==='tr'?'Full body':'Full body'},
+      {v:'3',label:appLang==='tr'?'3 Gün':'3 Days',sub:appLang==='tr'?'Push / Pull / Legs':'Push / Pull / Legs'},
+      {v:'4',label:appLang==='tr'?'4 Gün':'4 Days',sub:appLang==='tr'?'Upper / Lower':'Upper / Lower'},
+      {v:'5',label:appLang==='tr'?'5 Gün':'5 Days',sub:appLang==='tr'?'Kas grubu split':'Muscle group split'},
+    ]},
+
+  {id:'equipment',type:'single',
+    q:()=>appLang==='tr'?'Hangi ekipmana erişimin var?':'What equipment do you have access to?',
+    hint:()=>appLang==='tr'?'Egzersizler buna göre seçilir.':'Exercises will be selected based on this.',
+    opts:()=>[
+      {v:'gym',      label:appLang==='tr'?'Tam Donanımlı Salon':'Full Gym',           sub:appLang==='tr'?'Kablo, barbell, makine, dumbbell':'Cable machines, barbells, machines, dumbbells'},
+      {v:'cables',   label:appLang==='tr'?'Kablo Ağırlıklı Salon':'Cable-Focused Gym',sub:appLang==='tr'?'Kablo + dumbbell, barbell yok':'Cables + dumbbells, no barbell'},
+      {v:'dumbbells',label:appLang==='tr'?'Evde Dumbbell':'Home Dumbbells',           sub:appLang==='tr'?'Sadece serbest ağırlıklar':'Free weights only'},
+      {v:'none',     label:appLang==='tr'?'Ekipman Yok':'Bodyweight Only',            sub:appLang==='tr'?'Her yerde yapılır':'Can be done anywhere'},
+    ]},
+
+  {id:'injuries',type:'multi',
+    q:()=>appLang==='tr'?'Yaralanman veya fiziksel kısıtlaman var mı?':'Any injuries or physical limitations?',
+    hint:()=>appLang==='tr'?'Birden fazla seçebilirsin. Programı buna göre ayarlarım.':'Select all that apply. I will adjust your program accordingly.',
+    opts:()=>[
+      {v:'none',        label:appLang==='tr'?'Hayır, tamamen sağlıklıyım':'None — fully healthy'},
+      {v:'lower_back',  label:appLang==='tr'?'Bel / Alt sırt ağrısı':'Lower back pain'},
+      {v:'knee',        label:appLang==='tr'?'Diz sorunu':'Knee issues'},
+      {v:'shoulder',    label:appLang==='tr'?'Omuz sorunu':'Shoulder problems'},
+      {v:'wrist',       label:appLang==='tr'?'Bilek / Ön kol sorunu':'Wrist / forearm issues'},
+      {v:'neck',        label:appLang==='tr'?'Boyun ağrısı':'Neck pain'},
+      {v:'other',       label:appLang==='tr'?'Diğer (programı hafif tut)':'Other (keep it gentle)'},
+    ]},
+
+  // ── NUTRITION ───────────────────────────────────
+  {id:'meals',type:'single',
+    q:()=>appLang==='tr'?'Günde kaç öğün yiyebilirsin?':'How many meals can you eat per day?',
+    hint:()=>appLang==='tr'?'Kalori ve makrolar öğün sayısına bölünür.':'Calories and macros will be spread across these meals.',
+    opts:()=>[
+      {v:'3',label:appLang==='tr'?'3 Öğün':'3 Meals',sub:appLang==='tr'?'Sabah, öğle, akşam':'Breakfast, lunch, dinner'},
+      {v:'4',label:appLang==='tr'?'4 Öğün':'4 Meals',sub:appLang==='tr'?'Ara öğün ekli':'Includes a snack'},
+      {v:'5',label:appLang==='tr'?'5 Öğün':'5 Meals',sub:appLang==='tr'?'Sık sık az az':'Frequent smaller meals'},
+    ]},
+
+  {id:'diet_pref',type:'multi',
+    q:()=>appLang==='tr'?'Beslenme tercihlerin veya kısıtlamaların var mı?':'Any dietary preferences or restrictions?',
+    hint:()=>appLang==='tr'?'Beslenme önerilerini buna göre yapacağım.':'I will tailor meal suggestions to these.',
+    opts:()=>[
+      {v:'none',       label:appLang==='tr'?'Kısıtlama yok, her şeyi yerim':'No restrictions, I eat everything'},
+      {v:'vegetarian', label:appLang==='tr'?'Vejeteryan':'Vegetarian'},
+      {v:'vegan',      label:appLang==='tr'?'Vegan':'Vegan'},
+      {v:'lactose',    label:appLang==='tr'?'Laktozsuz':'Lactose-free'},
+      {v:'gluten',     label:appLang==='tr'?'Glutensiz':'Gluten-free'},
+      {v:'halal',      label:appLang==='tr'?'Helal':'Halal'},
+      {v:'budget',     label:appLang==='tr'?'Bütçe odaklı (ekonomik seçenekler)':'Budget-conscious (affordable options)'},
+    ]},
+
+  {id:'supplement_budget',type:'single',
+    q:()=>appLang==='tr'?'Takviye için aylık bütçen ne kadar?':'What is your monthly supplement budget?',
+    hint:()=>appLang==='tr'?'Bütçene uygun takviye önerisi yapacağım. Hiçbiri de tamamen geçerli bir seçenek.':'I will recommend supplements that fit your budget. Zero is a valid answer.',
+    opts:()=>[
+      {v:'zero',   label:appLang==='tr'?'Takviye almak istemiyorum':'No supplements',        sub:appLang==='tr'?'Sadece yiyeceklerle ilerliyorum':'Food only approach'},
+      {v:'low',    label:appLang==='tr'?'0–200 TL / $5–10':'0–200 TL / $5–10',               sub:appLang==='tr'?'Temel takviye (sadece kreatin)':'Basics only (creatine)'},
+      {v:'medium', label:appLang==='tr'?'200–500 TL / $10–25':'200–500 TL / $10–25',         sub:appLang==='tr'?'Kreatin + D vitamini + Omega-3':'Creatine + Vitamin D + Omega-3'},
+      {v:'high',   label:appLang==='tr'?'500+ TL / $25+':'500+ TL / $25+',                   sub:appLang==='tr'?'Whey protein dahil tam paket':'Full stack including whey protein'},
+    ]},
+
+  // ── CARDIO ──────────────────────────────────────
+  {id:'cardio',type:'single',
+    q:()=>appLang==='tr'?'Kardiyo yapmak istiyor musun?':'Would you like cardio in your plan?',
+    hint:()=>appLang==='tr'?'Detaylı kardiyo programı eklenir.':'A detailed cardio plan will be added.',
+    opts:()=>[
+      {v:'run',  label:appLang==='tr'?'🏃 Koşu':'🏃 Running',          sub:appLang==='tr'?'Haftada 2-3 gün, 30-40 dk':'2-3x/week, 30-40 min'},
+      {v:'hiit', label:'⚡ HIIT',                                        sub:appLang==='tr'?'Haftada 2 gün, 20-25 dk — en hızlı yağ yakımı':'2x/week, 20-25 min — fastest fat loss'},
+      {v:'walk', label:appLang==='tr'?'🚶 Yürüyüş':'🚶 Walking',        sub:appLang==='tr'?'Haftada 3-4 gün, 40-50 dk':'3-4x/week, 40-50 min'},
+      {v:'bike', label:appLang==='tr'?'🚴 Bisiklet':'🚴 Cycling',        sub:appLang==='tr'?'Haftada 2-3 gün, 30-45 dk':'2-3x/week, 30-45 min'},
+      {v:'swim', label:appLang==='tr'?'🏊 Yüzme':'🏊 Swimming',          sub:appLang==='tr'?'Haftada 2 gün, 30-40 dk':'2x/week, 30-40 min'},
+      {v:'none', label:appLang==='tr'?'Sadece ağırlık':'Weights only',  sub:appLang==='tr'?'Kardiyo eklenmez':'No cardio added'},
+    ]},
+];
+
+// ═══════════════════════════════════════════════
+// EGZERSİZ VERİTABANI
+// ═══════════════════════════════════════════════
+const DB={
+  push:{
+    chest:{
+      gym:[
+        {name:'Incline Dumbbell Press',sets:'4×8-10',note:'Üst göğüs için en kritik hareket. 30-45° açı. Yavaş indir, patlat.',muscles:[{n:'Üst Göğüs',p:70,primary:true},{n:'Ön Omuz',p:20,primary:false},{n:'Triceps',p:10,primary:false}],best:true},
+        {name:'Cable Chest Fly',sets:'3×12-15',note:'Göğüs izolasyonu. Gerilim tüm hareket boyunca sabit.',muscles:[{n:'Göğüs',p:85,primary:true},{n:'Ön Omuz',p:10,primary:false},{n:'Biceps',p:5,primary:false}],best:true},
+        {name:'Flat Barbell Bench Press',sets:'4×6-8',note:'Göğüs genel hacmi ve güç. Skapulayı sık.',muscles:[{n:'Göğüs',p:65,primary:true},{n:'Ön Omuz',p:20,primary:false},{n:'Triceps',p:15,primary:false}]},
+        {name:'Decline Dumbbell Press',sets:'3×10-12',note:'Alt göğüs dolgunluğu. 20-30° aşağı açı.',muscles:[{n:'Alt Göğüs',p:70,primary:true},{n:'Triceps',p:20,primary:false},{n:'Ön Omuz',p:10,primary:false}]},
+        {name:'Chest Dip',sets:'3×10-12',note:'Öne eğil. Alt göğüs + triceps.',muscles:[{n:'Alt Göğüs',p:55,primary:true},{n:'Triceps',p:35,primary:false},{n:'Ön Omuz',p:10,primary:false}]},
+        {name:'Push-Up',sets:'3×max',note:'En temel hareket. Tam in, tam çık. Yeni başlayanlar için mükemmel.',muscles:[{n:'Göğüs',p:60,primary:true},{n:'Triceps',p:25,primary:false},{n:'Ön Omuz',p:15,primary:false}]},
+        {name:'Pec Deck (Butterfly)',sets:'3×12-15',note:'Makine göğüs fly. Omuz problemi olanlara barbell yerine daha güvenli.',muscles:[{n:'Göğüs',p:85,primary:true},{n:'Ön Omuz',p:10,primary:false},{n:'Biceps',p:5,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Incline Dumbbell Press',sets:'4×8-10',note:'Üst göğüs için. 30-45° açı.',muscles:[{n:'Üst Göğüs',p:70,primary:true},{n:'Ön Omuz',p:20,primary:false},{n:'Triceps',p:10,primary:false}],best:true},
+        {name:'Dumbbell Fly',sets:'3×12-15',note:'Göğüs izolasyonu. Hafif kilo, tam aç.',muscles:[{n:'Göğüs',p:85,primary:true},{n:'Ön Omuz',p:10,primary:false},{n:'Biceps',p:5,primary:false}],best:true},
+        {name:'Flat Dumbbell Press',sets:'3×10-12',note:'Göğüs genel hacmi.',muscles:[{n:'Göğüs',p:65,primary:true},{n:'Ön Omuz',p:20,primary:false},{n:'Triceps',p:15,primary:false}]},
+        {name:'Push-Up (Ağırlıklı)',sets:'3×max',note:'Sırta plaka koy veya yavaş yap.',muscles:[{n:'Göğüs',p:60,primary:true},{n:'Triceps',p:25,primary:false},{n:'Ön Omuz',p:15,primary:false}]},
+      ],
+      none:[
+        {name:'Wide Push-Up',sets:'4×max',note:'El açıklığı geniş — göğüs odaklı.',muscles:[{n:'Göğüs',p:65,primary:true},{n:'Triceps',p:20,primary:false},{n:'Ön Omuz',p:15,primary:false}],best:true},
+        {name:'Decline Push-Up',sets:'3×12',note:'Ayaklar yüksekte — üst göğüs.',muscles:[{n:'Üst Göğüs',p:70,primary:true},{n:'Ön Omuz',p:20,primary:false},{n:'Triceps',p:10,primary:false}]},
+        {name:'Diamond Push-Up',sets:'3×max',note:'Eller yakın — iç göğüs ve triceps.',muscles:[{n:'İç Göğüs',p:45,primary:true},{n:'Triceps',p:45,primary:true},{n:'Ön Omuz',p:10,primary:false}]},
+        {name:'Pike Push-Up',sets:'3×12',note:'Kalçaları yukarı — üst göğüs ve omuz.',muscles:[{n:'Üst Göğüs',p:40,primary:true},{n:'Ön Omuz',p:50,primary:true},{n:'Triceps',p:10,primary:false}]},
+      ]
+    },
+    shoulder:{
+      gym:[
+        {name:'Seated Dumbbell Press',sets:'4×10-12',note:'Her omuz bağımsız. Asimetri düzelir.',muscles:[{n:'Orta Omuz',p:55,primary:true},{n:'Ön Omuz',p:30,primary:false},{n:'Triceps',p:15,primary:false}],best:true},
+        {name:'Cable Lateral Raise',sets:'3×15-20',note:'Yan omuz izolasyonu. Gerilim sabit.',muscles:[{n:'Lateral Omuz',p:85,primary:true},{n:'Trapez',p:10,primary:false},{n:'Ön Omuz',p:5,primary:false}],best:true},
+        {name:'Arnold Press',sets:'3×10-12',note:'Tüm omuz başlarını çalıştırır.',muscles:[{n:'Ön Omuz',p:40,primary:true},{n:'Lateral Omuz',p:40,primary:true},{n:'Triceps',p:20,primary:false}]},
+        {name:'Dumbbell Lateral Raise',sets:'3×15',note:'Hafif kilo, form önce.',muscles:[{n:'Lateral Omuz',p:80,primary:true},{n:'Trapez',p:15,primary:false},{n:'Ön Omuz',p:5,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Seated Dumbbell Press',sets:'4×10-12',note:'Oturarak yap, sırta yaslan.',muscles:[{n:'Orta Omuz',p:55,primary:true},{n:'Ön Omuz',p:30,primary:false},{n:'Triceps',p:15,primary:false}],best:true},
+        {name:'Dumbbell Lateral Raise',sets:'3×15',note:'Hafif kilo, form önce.',muscles:[{n:'Lateral Omuz',p:80,primary:true},{n:'Trapez',p:15,primary:false},{n:'Ön Omuz',p:5,primary:false}],best:true},
+        {name:'Arnold Press',sets:'3×10',note:'Avuçlar sana dönük başla, press ederken döndür.',muscles:[{n:'Ön Omuz',p:40,primary:true},{n:'Lateral Omuz',p:40,primary:true},{n:'Triceps',p:20,primary:false}]},
+        {name:'Dumbbell Front Raise',sets:'3×12',note:'Ön omuz. Salınma yok.',muscles:[{n:'Ön Omuz',p:80,primary:true},{n:'Üst Göğüs',p:15,primary:false},{n:'Lateral Omuz',p:5,primary:false}]},
+      ],
+      none:[
+        {name:'Pike Push-Up',sets:'4×12',note:'Kalçaları yüksek tut.',muscles:[{n:'Ön Omuz',p:50,primary:true},{n:'Lateral Omuz',p:30,primary:false},{n:'Triceps',p:20,primary:false}],best:true},
+        {name:'Wall Handstand Hold',sets:'3×20sn',note:'Duvara karşı amut. Omuz stabilitesi.',muscles:[{n:'Ön Omuz',p:40,primary:true},{n:'Lateral Omuz',p:40,primary:true},{n:'Core',p:20,primary:false}]},
+        {name:'Arm Circles',sets:'3×30',note:'Küçükten büyüğe. Omuz sağlığı.',muscles:[{n:'Omuz',p:70,primary:true},{n:'Sırt',p:30,primary:false}]},
+      ]
+    },
+    triceps:{
+      gym:[
+        {name:'Overhead Cable Extension',sets:'3×10-12',note:'Long head tam gerilimde. Dirsekler sabit.',muscles:[{n:'Triceps Long Head',p:70,primary:true},{n:'Triceps Lateral',p:30,primary:false}],best:true},
+        {name:'Triceps Pushdown',sets:'3×12-15',note:'Tam uzat, 1sn tut. Dirsekler vücuda bitişik.',muscles:[{n:'Triceps Lateral',p:60,primary:true},{n:'Triceps Long Head',p:40,primary:false}]},
+        {name:'Skull Crusher',sets:'3×10',note:'Yavaş indir, dirsekler sabit.',muscles:[{n:'Triceps Long Head',p:65,primary:true},{n:'Triceps Lateral',p:35,primary:false}]},
+        {name:'Dips (Triceps)',sets:'3×10-12',note:'Gövde dik tut.',muscles:[{n:'Triceps',p:60,primary:true},{n:'Alt Göğüs',p:30,primary:false},{n:'Ön Omuz',p:10,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Overhead DB Extension',sets:'3×12',note:'Tek dumbbell çift elle. Dirsekler sabit.',muscles:[{n:'Triceps Long Head',p:70,primary:true},{n:'Triceps Lateral',p:30,primary:false}],best:true},
+        {name:'Dumbbell Kickback',sets:'3×12-15',note:'Tam uzat, 1sn tut.',muscles:[{n:'Triceps Lateral',p:70,primary:true},{n:'Triceps Long Head',p:30,primary:false}]},
+        {name:'Lying DB Extension',sets:'3×10',note:'Sırt üstü yat, alnına indir.',muscles:[{n:'Triceps Long Head',p:65,primary:true},{n:'Triceps Lateral',p:35,primary:false}]},
+      ],
+      none:[
+        {name:'Diamond Push-Up',sets:'4×max',note:'Eller yakın, triceps izole.',muscles:[{n:'Triceps',p:55,primary:true},{n:'İç Göğüs',p:35,primary:false},{n:'Ön Omuz',p:10,primary:false}],best:true},
+        {name:'Bench Dip',sets:'3×15',note:'Sandalye kullan. Dirsekler yakın.',muscles:[{n:'Triceps',p:65,primary:true},{n:'Ön Omuz',p:25,primary:false},{n:'Göğüs',p:10,primary:false}]},
+        {name:'Pike Push-Up (Dar)',sets:'3×12',note:'El açıklığı dar — triceps devreye girer.',muscles:[{n:'Triceps',p:50,primary:true},{n:'Ön Omuz',p:40,primary:false},{n:'Göğüs',p:10,primary:false}]},
+      ]
+    }
+  },
+  pull:{
+    back:{
+      gym:[
+        {name:'Wide Grip Lat Pulldown',sets:'4×10-12',note:'Geniş kanat = V-taper. Sırtla çek, kollarla değil.',muscles:[{n:'Lat (Geniş Sırt)',p:70,primary:true},{n:'Biceps',p:20,primary:false},{n:'Arka Omuz',p:10,primary:false}],best:true},
+        {name:'Seated Cable Row',sets:'3×10-12',note:'Sırt kalınlığı. Dirsekleri yanına çek.',muscles:[{n:'Orta Sırt',p:65,primary:true},{n:'Lat (Geniş Sırt)',p:20,primary:false},{n:'Biceps',p:15,primary:false}],best:true},
+        {name:'Barbell Row',sets:'3×8-10',note:'Sırt güç hareketi. 45° öne eğil.',muscles:[{n:'Orta Sırt',p:55,primary:true},{n:'Lat (Geniş Sırt)',p:25,primary:false},{n:'Biceps',p:20,primary:false}]},
+        {name:'Straight Arm Pulldown',sets:'3×15',note:'Kollar düz — lat izolasyonu.',muscles:[{n:'Lat (Geniş Sırt)',p:80,primary:true},{n:'Arka Omuz',p:15,primary:false},{n:'Core',p:5,primary:false}]},
+        {name:'Single Arm Cable Row',sets:'3×10',note:'Her kol bağımsız — asimetriyi düzeltir.',muscles:[{n:'Orta Sırt',p:60,primary:true},{n:'Lat (Geniş Sırt)',p:25,primary:false},{n:'Biceps',p:15,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Single Arm DB Row',sets:'4×10-12',note:'Sırt düz, kürek kemiğini sıkıştır.',muscles:[{n:'Lat (Geniş Sırt)',p:55,primary:true},{n:'Orta Sırt',p:30,primary:false},{n:'Biceps',p:15,primary:false}],best:true},
+        {name:'Bent Over DB Row',sets:'3×10',note:'İki kol aynı anda. Öne eğil.',muscles:[{n:'Orta Sırt',p:55,primary:true},{n:'Lat (Geniş Sırt)',p:25,primary:false},{n:'Biceps',p:20,primary:false}]},
+        {name:'Dumbbell Pullover',sets:'3×12',note:'Sırt üstü yat. Lat gerilimi.',muscles:[{n:'Lat (Geniş Sırt)',p:65,primary:true},{n:'Göğüs',p:25,primary:false},{n:'Core',p:10,primary:false}]},
+        {name:'Renegade Row',sets:'3×8',note:'Plank pozisyonunda row. Core + sırt.',muscles:[{n:'Orta Sırt',p:50,primary:true},{n:'Core',p:30,primary:false},{n:'Biceps',p:20,primary:false}]},
+      ],
+      none:[
+        {name:'Pull-Up',sets:'4×max',note:'En iyi sırt hareketi. Tam sarksın, tam çıksın.',muscles:[{n:'Lat (Geniş Sırt)',p:65,primary:true},{n:'Biceps',p:25,primary:false},{n:'Arka Omuz',p:10,primary:false}],best:true},
+        {name:'Chin-Up',sets:'3×max',note:'Avuç içi sana dönük — sırt + biceps.',muscles:[{n:'Lat (Geniş Sırt)',p:55,primary:true},{n:'Biceps',p:35,primary:false},{n:'Arka Omuz',p:10,primary:false}]},
+        {name:'Inverted Row',sets:'3×12',note:'Masa altına gir, göğsü değdir.',muscles:[{n:'Orta Sırt',p:60,primary:true},{n:'Biceps',p:25,primary:false},{n:'Arka Omuz',p:15,primary:false}]},
+      ]
+    },
+    rear_delt:{
+      gym:[
+        {name:'Face Pull',sets:'3×15-20',note:'Arka omuz + dış rotasyon + postür. Üç işlevi var.',muscles:[{n:'Arka Omuz',p:55,primary:true},{n:'Dış Rotator',p:30,primary:false},{n:'Trapez',p:15,primary:false}],best:true},
+        {name:'Reverse Pec Deck',sets:'3×15',note:'Arka omuz izolasyonu.',muscles:[{n:'Arka Omuz',p:75,primary:true},{n:'Trapez',p:15,primary:false},{n:'Sırt',p:10,primary:false}]},
+        {name:'Cable Rear Delt Fly',sets:'3×15',note:'Çapraz kablo. Her iki taraf.',muscles:[{n:'Arka Omuz',p:70,primary:true},{n:'Trapez',p:20,primary:false},{n:'Sırt',p:10,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Incline Rear Delt Fly',sets:'3×15',note:'Bench göğüs üstü uzan, yana aç.',muscles:[{n:'Arka Omuz',p:75,primary:true},{n:'Trapez',p:15,primary:false},{n:'Sırt',p:10,primary:false}],best:true},
+        {name:'Bent Over Lateral Raise',sets:'3×15',note:'Öne eğil, yana aç.',muscles:[{n:'Arka Omuz',p:70,primary:true},{n:'Trapez',p:20,primary:false},{n:'Sırt',p:10,primary:false}]},
+        {name:'Lying Rear Delt Fly',sets:'3×15',note:'Yere uzanarak.',muscles:[{n:'Arka Omuz',p:80,primary:true},{n:'Trapez',p:15,primary:false},{n:'Sırt',p:5,primary:false}]},
+      ],
+      none:[
+        {name:'YTW Exercise',sets:'3×12',note:'Yüzüstü yat. Y-T-W şekillerini sırayla yap.',muscles:[{n:'Arka Omuz',p:50,primary:true},{n:'Trapez',p:30,primary:false},{n:'Rhomboid',p:20,primary:false}],best:true},
+        {name:'Band Pull-Apart',sets:'4×20',note:'Havlu veya elastik bant. Arka omuz.',muscles:[{n:'Arka Omuz',p:65,primary:true},{n:'Trapez',p:25,primary:false},{n:'Dış Rotator',p:10,primary:false}]},
+      ]
+    },
+    biceps:{
+      gym:[
+        {name:'Barbell Curl',sets:'3×10-12',note:'Pazı ana güç hareketi. Sallanma yok.',muscles:[{n:'Biceps',p:75,primary:true},{n:'Brachialis',p:20,primary:false},{n:'Ön Kol',p:5,primary:false}],best:true},
+        {name:'Hammer Curl',sets:'3×10-12',note:'Kolu kalın gösteren yan kas. Nötr tutuş.',muscles:[{n:'Brachialis',p:55,primary:true},{n:'Biceps',p:35,primary:false},{n:'Ön Kol',p:10,primary:false}],best:true},
+        {name:'Dumbbell Supinating Curl',sets:'3×12',note:'Tepede bileği döndür — pazı tepesi.',muscles:[{n:'Biceps',p:80,primary:true},{n:'Brachialis',p:15,primary:false},{n:'Ön Kol',p:5,primary:false}]},
+        {name:'Incline DB Curl',sets:'3×12',note:'Long head tam gerilimde.',muscles:[{n:'Biceps Long Head',p:75,primary:true},{n:'Brachialis',p:25,primary:false}]},
+        {name:'Cable Curl',sets:'2×15',note:'Tepede gerilim devam eder.',muscles:[{n:'Biceps',p:80,primary:true},{n:'Brachialis',p:15,primary:false},{n:'Ön Kol',p:5,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Dumbbell Supinating Curl',sets:'3×12',note:'Tam esnet, tepede döndür.',muscles:[{n:'Biceps',p:80,primary:true},{n:'Brachialis',p:15,primary:false},{n:'Ön Kol',p:5,primary:false}],best:true},
+        {name:'Hammer Curl',sets:'3×10-12',note:'Nötr tutuş. Kol kalınlığı.',muscles:[{n:'Brachialis',p:55,primary:true},{n:'Biceps',p:35,primary:false},{n:'Ön Kol',p:10,primary:false}],best:true},
+        {name:'Incline DB Curl',sets:'3×12',note:'Sandalyeye yaslan, kollar sarkık.',muscles:[{n:'Biceps Long Head',p:75,primary:true},{n:'Brachialis',p:25,primary:false}]},
+        {name:'Concentration Curl',sets:'3×12',note:'Dirsek dize dayan. Pazı tepesi.',muscles:[{n:'Biceps',p:85,primary:true},{n:'Brachialis',p:15,primary:false}]},
+      ],
+      none:[
+        {name:'Chin-Up',sets:'4×max',note:'Avuç içi sana dönük.',muscles:[{n:'Biceps',p:40,primary:true},{n:'Lat (Geniş Sırt)',p:50,primary:true},{n:'Arka Omuz',p:10,primary:false}],best:true},
+        {name:'Towel Curl',sets:'3×12',note:'Ayağında havlu, avuç içi yukarı.',muscles:[{n:'Biceps',p:75,primary:true},{n:'Brachialis',p:20,primary:false},{n:'Ön Kol',p:5,primary:false}]},
+      ]
+    }
+  },
+  legs:{
+    quad:{
+      gym:[
+        {name:'Leg Press',sets:'4×10-12',note:'Tam açıl (90°+), patlat.',muscles:[{n:'Quadriceps',p:65,primary:true},{n:'Glute',p:25,primary:false},{n:'Hamstring',p:10,primary:false}],best:true},
+        {name:'Goblet Squat',sets:'3×12',note:'Dumbbell göğse yakın. Derin çök.',muscles:[{n:'Quadriceps',p:55,primary:true},{n:'Glute',p:30,primary:false},{n:'Core',p:15,primary:false}]},
+        {name:'Hack Squat',sets:'3×10',note:'Makine squat. Quad izolasyonu.',muscles:[{n:'Quadriceps',p:70,primary:true},{n:'Glute',p:20,primary:false},{n:'Hamstring',p:10,primary:false}]},
+        {name:'Leg Extension',sets:'3×15',note:'Quad izolasyonu. Tepede 1sn tut.',muscles:[{n:'Quadriceps',p:95,primary:true},{n:'Diz Çevresi',p:5,primary:false}]},
+        {name:'Walking Lunge',sets:'3×10',note:'Kuvvet + denge. Step geniş.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:35,primary:false},{n:'Hamstring',p:15,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Goblet Squat',sets:'4×12',note:'Dumbbell göğse yakın. Tam çök.',muscles:[{n:'Quadriceps',p:55,primary:true},{n:'Glute',p:30,primary:false},{n:'Core',p:15,primary:false}],best:true},
+        {name:'Bulgarian Split Squat',sets:'3×10',note:'Arka ayak yüksekte. Çok etkili.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:40,primary:false},{n:'Hamstring',p:10,primary:false}]},
+        {name:'Dumbbell Lunge',sets:'3×10',note:'Diz yere değmeden dur.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:35,primary:false},{n:'Hamstring',p:15,primary:false}]},
+        {name:'Step-Up',sets:'3×12',note:'Sağlam yüksek yüzeye adım at.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:40,primary:false},{n:'Hamstring',p:10,primary:false}]},
+      ],
+      none:[
+        {name:'Squat',sets:'4×20',note:'Tam çök. Diz parmak ucunu geçsin.',muscles:[{n:'Quadriceps',p:55,primary:true},{n:'Glute',p:30,primary:false},{n:'Core',p:15,primary:false}],best:true},
+        {name:'Bulgarian Split Squat',sets:'3×12',note:'Arka ayak yüksekte.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:40,primary:false},{n:'Hamstring',p:10,primary:false}]},
+        {name:'Jump Squat',sets:'3×15',note:'Patlayıcı güç. Tam çök, patlat.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:30,primary:false},{n:'Cardio',p:20,primary:false}]},
+        {name:'Wall Sit',sets:'3×45sn',note:'Duvara dayan, 90° otur.',muscles:[{n:'Quadriceps',p:90,primary:true},{n:'Glute',p:10,primary:false}]},
+        {name:'Reverse Lunge',sets:'3×12',note:'Öne değil geriye adım at — diz üzerindeki baskı daha az.',muscles:[{n:'Quadriceps',p:50,primary:true},{n:'Glute',p:35,primary:false},{n:'Hamstring',p:15,primary:false}]},
+        {name:'Step Touch',sets:'3×20sn',note:'Yeni başlayanlar için. Yan adımlarla ısın ve alt vücut aktive et.',muscles:[{n:'Quadriceps',p:40,primary:true},{n:'Glute',p:40,primary:false},{n:'Cardio',p:20,primary:false}]},
+      ]
+    },
+    hamstring:{
+      gym:[
+        {name:'Romanian Deadlift',sets:'3×10',note:'Sırt düz, kalçayı geriye it.',muscles:[{n:'Hamstring',p:60,primary:true},{n:'Glute',p:30,primary:false},{n:'Alt Sırt',p:10,primary:false}],best:true},
+        {name:'Leg Curl',sets:'3×12',note:'Yavaş indir (3sn), tepede 1sn tut.',muscles:[{n:'Hamstring',p:90,primary:true},{n:'Baldır',p:10,primary:false}],best:true},
+        {name:'Seated Leg Curl',sets:'3×12',note:'Farklı açı — hamstring tam gerilimde.',muscles:[{n:'Hamstring',p:80,primary:true},{n:'Baldır',p:20,primary:false}]},
+        {name:'Good Morning',sets:'3×12',note:'Esneklik + güç. Hafif kilo.',muscles:[{n:'Hamstring',p:55,primary:true},{n:'Alt Sırt',p:30,primary:false},{n:'Glute',p:15,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Romanian Deadlift (DB)',sets:'3×10',note:'Sırt düz, dumbbellları bacak boyunca indir.',muscles:[{n:'Hamstring',p:60,primary:true},{n:'Glute',p:30,primary:false},{n:'Alt Sırt',p:10,primary:false}],best:true},
+        {name:'Nordic Curl',sets:'3×6-8',note:'Ayaklar sabit, gövde öne iner. Çok etkili.',muscles:[{n:'Hamstring',p:85,primary:true},{n:'Baldır',p:10,primary:false},{n:'Glute',p:5,primary:false}]},
+        {name:'Single Leg RDL',sets:'3×10',note:'Denge + hamstring + glute.',muscles:[{n:'Hamstring',p:55,primary:true},{n:'Glute',p:35,primary:false},{n:'Core',p:10,primary:false}]},
+        {name:'Glute Bridge (Ağırlıklı)',sets:'4×15',note:'Kalça üstüne dumbbell. Tepede 2sn.',muscles:[{n:'Glute',p:65,primary:true},{n:'Hamstring',p:30,primary:false},{n:'Core',p:5,primary:false}]},
+      ],
+      none:[
+        {name:'Glute Bridge',sets:'4×20',note:'Tepede 2sn sıkıştır.',muscles:[{n:'Glute',p:65,primary:true},{n:'Hamstring',p:30,primary:false},{n:'Core',p:5,primary:false}],best:true},
+        {name:'Nordic Curl',sets:'3×6',note:'Ayaklar sabit.',muscles:[{n:'Hamstring',p:85,primary:true},{n:'Baldır',p:10,primary:false},{n:'Glute',p:5,primary:false}]},
+        {name:'Single Leg Glute Bridge',sets:'3×15',note:'Tek bacak — daha yoğun.',muscles:[{n:'Glute',p:55,primary:true},{n:'Hamstring',p:40,primary:false},{n:'Core',p:5,primary:false}]},
+        {name:'Donkey Kick',sets:'3×20',note:'Dörtte pozisyon, bacağı geriye fırlat.',muscles:[{n:'Glute',p:70,primary:true},{n:'Hamstring',p:25,primary:false},{n:'Core',p:5,primary:false}]},
+      ]
+    },
+    calf:{
+      gym:[
+        {name:'Standing Calf Raise',sets:'4×20',note:'Tam esnet, parmak ucunda 1sn tut.',muscles:[{n:'Gastrocnemius',p:70,primary:true},{n:'Soleus',p:30,primary:false}],best:true},
+        {name:'Seated Calf Raise',sets:'3×20',note:'Soleus kasını hedefler.',muscles:[{n:'Soleus',p:70,primary:true},{n:'Gastrocnemius',p:30,primary:false}]},
+        {name:'Single Leg Calf Raise',sets:'3×15',note:'Merdiven kenarında tam esnet.',muscles:[{n:'Gastrocnemius',p:70,primary:true},{n:'Soleus',p:30,primary:false}]},
+      ],
+      dumbbells:[
+        {name:'Dumbbell Calf Raise',sets:'4×20',note:'Merdiven kenarında tam esnet.',muscles:[{n:'Gastrocnemius',p:70,primary:true},{n:'Soleus',p:30,primary:false}],best:true},
+        {name:'Single Leg Calf Raise',sets:'3×20',note:'Tek elle duvara tutun.',muscles:[{n:'Gastrocnemius',p:75,primary:true},{n:'Soleus',p:25,primary:false}]},
+      ],
+      none:[
+        {name:'Bodyweight Calf Raise',sets:'4×30',note:'Merdiven kenarında. Kontrollü esnet.',muscles:[{n:'Gastrocnemius',p:70,primary:true},{n:'Soleus',p:30,primary:false}],best:true},
+        {name:'Jump Rope',sets:'3×1dk',note:'İp atlamak — baldır + kardiyo.',muscles:[{n:'Gastrocnemius',p:60,primary:true},{n:'Soleus',p:25,primary:false},{n:'Cardio',p:15,primary:false}]},
+      ]
+    }
+  },
+  core:{
+    gym:[
+      {name:'Cable Crunch',sets:'3×15',note:'Ağırlık eklenebilir karın hareketi.',muscles:[{n:'Üst Karın',p:70,primary:true},{n:'Oblique',p:20,primary:false},{n:'Hip Flexor',p:10,primary:false}],best:true},
+      {name:'Hanging Leg Raise',sets:'3×12',note:'Alt karın. Yavaş indir, sallanma yok.',muscles:[{n:'Alt Karın',p:65,primary:true},{n:'Hip Flexor',p:25,primary:false},{n:'Oblique',p:10,primary:false}],best:true},
+      {name:'Ab Wheel Rollout',sets:'3×10',note:'Tüm core yüklenir. Sırt düz.',muscles:[{n:'Core (genel)',p:60,primary:true},{n:'Lat (Geniş Sırt)',p:25,primary:false},{n:'Omuz',p:15,primary:false}]},
+      {name:'Plank (Ağırlıklı)',sets:'3×45sn',note:'Sırta plaka koy. Kalça hizada.',muscles:[{n:'Core (genel)',p:70,primary:true},{n:'Omuz',p:20,primary:false},{n:'Glute',p:10,primary:false}]},
+    ],
+    dumbbells:[
+      {name:'Plank',sets:'3×45sn',note:'Sırt düz, kalça hizada.',muscles:[{n:'Core (genel)',p:70,primary:true},{n:'Omuz',p:20,primary:false},{n:'Glute',p:10,primary:false}],best:true},
+      {name:'Russian Twist (DB)',sets:'3×20',note:'Gövdeyi döndür, dumbbell yere değdir.',muscles:[{n:'Oblique',p:70,primary:true},{n:'Üst Karın',p:20,primary:false},{n:'Hip Flexor',p:10,primary:false}],best:true},
+      {name:'Dead Bug',sets:'3×10',note:'Sırt üstü yat, kol ve bacakları ters indir.',muscles:[{n:'Core (genel)',p:75,primary:true},{n:'Hip Flexor',p:15,primary:false},{n:'Omuz',p:10,primary:false}]},
+    ],
+    none:[
+      {name:'Plank',sets:'3×45sn',note:'Sırt düz, kalça hizada.',muscles:[{n:'Core (genel)',p:70,primary:true},{n:'Omuz',p:20,primary:false},{n:'Glute',p:10,primary:false}],best:true},
+      {name:'Leg Raise',sets:'3×15',note:'Yavaş indir. Alt karın için en iyi.',muscles:[{n:'Alt Karın',p:65,primary:true},{n:'Hip Flexor',p:25,primary:false},{n:'Oblique',p:10,primary:false}],best:true},
+      {name:'Bicycle Crunch',sets:'3×20',note:'Dirsek karşı dize. Yavaş yap.',muscles:[{n:'Oblique',p:55,primary:true},{n:'Üst Karın',p:35,primary:false},{n:'Hip Flexor',p:10,primary:false}]},
+      {name:'Mountain Climber',sets:'3×30sn',note:'Diz göğse. Core + kardiyo.',muscles:[{n:'Core (genel)',p:55,primary:true},{n:'Omuz',p:25,primary:false},{n:'Cardio',p:20,primary:false}]},
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════
+// PROGRAM OLUŞTURUCU
+// ═══════════════════════════════════════════════
+let answers={}, currentStep=0, program=null, editKey=null, editAnswers={};
+let swapDayIdx=null, swapSecIdx=null, swapExIdx=null;
+
+const MAJOR=new Set(['push.chest','pull.back','legs.quad','legs.hamstring']);
+const MINOR=new Set(['legs.calf','core','push.triceps','pull.rear_delt']);
+
+function getExCount(intensity,isMajor){
+  if(intensity==='light')return 1;
+  if(intensity==='medium')return isMajor?2:1;
+  return 2;
+}
+
+function buildProgram(a){
+  const h=parseInt(a.height), w=parseFloat(a.weight), age=parseInt(a.age);
+  const lv=a.level||'intermediate', intensity=a.intensity||'medium';
+  const dbEq=(a.equipment==='cables')?'cables':(a.equipment==='gym')?'gym':(a.equipment==='dumbbells')?'dumbbells':'none';
+  const injuries=a.injuries||[];
+  const focusMuscles=a.focus_muscles||['balanced'];
+  const sleepQ=a.sleep||'ok';
+  const activityLevel=a.activity_level||'moderate';
+  const sportHistory=a.sport_history||['none'];
+  const dietPref=a.diet_pref||['none'];
+  const suppBudget=a.supplement_budget||'medium';
+
+  // ── TDEE ─────────────────────────────────────
+  // Activity multiplier now uses BOTH training days AND daily activity level
+  const baseAct={sedentary:1.2, light:1.375, moderate:1.55, very_active:1.725}[activityLevel]||1.55;
+  // Training days boost
+  const trainBoost={2:0.05,3:0.1,4:0.15,5:0.175}[parseInt(a.days)]||0.1;
+  const actMult=Math.min(baseAct+trainBoost, 1.9);
+  const bmr=a.gender==='male'?10*w+6.25*h-5*age+5:10*w+6.25*h-5*age-161;
+  const tdee=Math.round(bmr*actMult);
+
+  // ── BMI & LEAN MASS ────────────────────────────
+  const bmi=w/((h/100)**2);
+  const fatPct=Math.min(Math.max((1.20*bmi+0.23*age-(a.gender==='male'?16.2:5.4))/100,0.05),0.55);
+  const leanMass=Math.round(w*(1-fatPct));
+
+  // ── SLEEP RECOVERY MODIFIER ────────────────────
+  // Poor sleep = reduce volume recommendation
+  const sleepMod={poor:-1, low:-1, ok:0, great:0}[sleepQ]||0;
+
+  // ── CALORIE DEFICIT/SURPLUS ────────────────────
+  function getDeficit(goal,bmi){
+    if(goal==='bulk') return bmi>=27?150:350;
+    if(goal==='gain_weight') return bmi>=27?300:500;
+    if(goal==='cut') return bmi>=35?-750:bmi>=30?-600:-450;
+    if(goal==='lose_weight') return bmi>=35?-1000:bmi>=30?-800:-600;
+    if(goal==='recomp') return bmi>=30?-400:bmi>=25?-200:0;
+    return 0;
+  }
+  const kcal=Math.max(tdee+getDeficit(a.goal,bmi), a.gender==='male'?1500:1200);
+
+  // ── MACROS ────────────────────────────────────
+  const proteinMult=['cut','lose_weight'].includes(a.goal)?2.2:2.0;
+  const protein=Math.round(leanMass*proteinMult);
+  const fat=Math.round(leanMass*0.9);
+  const carbs=Math.max(Math.round((kcal-protein*4-fat*9)/4),50);
+
+  // ── GOAL NAMES ────────────────────────────────
+  const L=appLang==='tr';
+  const goalNames={
+    bulk:L?'Kas & Hacim Kazan':'Build Muscle & Size',
+    cut:L?'Yağ Yak & Kas Koru':'Burn Fat & Keep Muscle',
+    gain_weight:L?'Kilo Al':'Gain Weight',
+    lose_weight:L?'Kilo Ver':'Lose Weight',
+    recomp:L?'Rekomp':'Recomposition',
+    maintain:L?'Formda Kal':'Stay Fit'
+  };
+
+  // ── TARGET WEIGHT ─────────────────────────────
+  const targetW=parseFloat(a.target_weight)||null;
+  const weightDiff=targetW?Math.round((targetW-w)*10)/10:null;
+  const weekly={bulk:.35,gain_weight:.5,cut:-.45,lose_weight:-.6}[a.goal]||0;
+  const weeksToGoal=targetW&&weekly!==0?Math.abs(Math.round(weightDiff/weekly)):null;
+
+  // ── BUILD WORKOUT DAYS ────────────────────────
+  const days=parseInt(a.days);
+  const splits={
+    2:[['push.chest','push.shoulder','push.triceps','legs.calf'],
+       ['pull.back','pull.rear_delt','pull.biceps','legs.quad','legs.hamstring','core']],
+    3:[['push.chest','push.shoulder','push.triceps'],
+       ['pull.back','pull.rear_delt','pull.biceps'],
+       ['legs.quad','legs.hamstring','legs.calf','core']],
+    4:[['push.chest','push.shoulder','push.triceps'],
+       ['legs.quad','legs.calf','core'],
+       ['pull.back','pull.rear_delt','pull.biceps'],
+       ['legs.hamstring','legs.calf','core']],
+    5:[['push.chest','push.triceps'],
+       ['pull.back','pull.biceps'],
+       ['legs.quad','legs.hamstring','legs.calf'],
+       ['push.shoulder','pull.rear_delt','core'],
+       ['push.chest','pull.back','legs.quad']]
+  };
+
+  // Apply focus muscle boost: if user selected specific muscles, 
+  // add extra section for them where possible
+  function boostSplitForFocus(split, focus){
+    if(!focus||focus.includes('balanced')) return split;
+    // Map focus to muscle groups
+    const focusMap={
+      back:    ['pull.back','pull.rear_delt'],
+      shoulders:['push.shoulder','pull.rear_delt'],
+      arms:    ['push.triceps','pull.biceps'],
+      chest:   ['push.chest'],
+      legs:    ['legs.quad','legs.hamstring','legs.calf'],
+      core:    ['core']
+    };
+    const boostKeys=focus.flatMap(f=>focusMap[f]||[]);
+    // For each day in the split, if a boosted group exists, ensure it has max count
+    return split.map(daySecs=>{
+      const boosted=[...daySecs];
+      boostKeys.forEach(key=>{
+        if(!boosted.includes(key) && boostKeys.length>0){
+          // Don't add, just mark for extra reps in mkDay
+        }
+      });
+      return boosted;
+    });
+  }
+
+  const baseSplit=splits[days]||splits[3];
+  const boostedSplit=boostSplitForFocus(baseSplit, focusMuscles);
+
+  const focuses={
+    2:[L?'İTİŞ — Göğüs · Omuz · Triceps':'PUSH — Chest · Shoulder · Triceps',
+       L?'ÇEKİŞ & ALT VÜCUT':'PULL & LOWER BODY'],
+    3:[L?'İTİŞ — Göğüs · Omuz · Triceps':'PUSH — Chest · Shoulder · Triceps',
+       L?'ÇEKİŞ — Sırt · Biceps':'PULL — Back · Biceps',
+       L?'ALT VÜCUT & CORE':'LOWER BODY & CORE'],
+    4:[L?'UPPER A — İtiş':'UPPER A — Push',
+       L?'LOWER A — Ön Bacak':'LOWER A — Quad Focus',
+       L?'UPPER B — Çekiş':'UPPER B — Pull',
+       L?'LOWER B — Arka Bacak':'LOWER B — Hamstring Focus'],
+    5:[L?'GÖĞÜS & TRİCEPS':'CHEST & TRICEPS',
+       L?'SIRT & BİCEPS':'BACK & BICEPS',
+       L?'BACAK':'LEGS',
+       L?'OMUZ & CORE':'SHOULDERS & CORE',
+       L?'FULL BODY PUMP':'FULL BODY PUMP']
+  };
+
+  const workoutDays=boostedSplit.map((secs,i)=>
+    mkDay(i+1,(L?'DAY ':'DAY ')+(i+1),(focuses[days]||focuses[3])[i]||'DAY '+(i+1),
+      secs,a,intensity,dbEq,focusMuscles,injuries,sleepMod)
+  );
+
+  // ── NUTRITION STRATEGY ────────────────────────
+  const bmiNote=bmi>=30?(L?' (Kalori açığı vücut yağına göre ayarlandı)':' (Deficit adjusted for body fat)')
+               :bmi>=25?(L?' (Hafif kiloluya göre optimize edildi)':' (Optimized for overweight)'):'';
+  const strategies={
+    bulk:bmi>=27
+      ?(L?`Vücut yağın yüksek — küçük fazla (+150 kcal) uygulandı.${bmiNote}`:`High body fat — small surplus (+150 kcal) applied.${bmiNote}`)
+      :(L?'Bakımın üstünde +350 kcal. Temiz bulk — haftada 0.3-0.5 kg artış.':'Maintenance +350 kcal. Clean bulk — 0.3-0.5 kg/week gain.'),
+    cut:L?`Kalori açığın vücut yağına göre ayarlandı.${bmiNote} Protein yağsız kütleye göre hesaplandı.`
+         :`Deficit adjusted to body composition.${bmiNote} Protein calculated from lean mass.`,
+    gain_weight:bmi>=27
+      ?(L?'Vücut yağın zaten yüksek. Önce rekomp düşün.':'Body fat already high. Consider recomposition first.')
+      :(L?'Yüksek kalori fazlası. 3-4 saatte bir ye.':'High calorie surplus. Eat every 3-4 hours.'),
+    lose_weight:L?`Kalori açığın vücut yağına göre belirlendi.${bmiNote} Yüksek protein kas kaybını önler.`
+                 :`Deficit calibrated to body fat.${bmiNote} High protein prevents muscle loss.`,
+    recomp:bmi>=30
+      ?(L?`Yüksek vücut yağında rekomp — kalori açığı (-400 kcal) uygulandı.${bmiNote}`:`High body fat recomp — deficit applied (-400 kcal).${bmiNote}`)
+      :bmi>=25?(L?'Hafif kalori açığı ile hem yağ yakıyorsun hem kas yapıyorsun.':'Slight deficit — burning fat while building muscle.')
+              :(L?'Bakım kalorisi. Antrenman günleri karbı artır.':'Maintenance. Increase carbs on training days.'),
+    maintain:L?'Formu koruma kalorisi. Her öğünde protein olsun.':'Maintenance calories. Include protein every meal.'
+  };
+
+  // ── SLEEP WARNING ─────────────────────────────
+  const sleepWarning = (sleepQ==='poor'||sleepQ==='low')
+    ? (L?'\n\n⚠️ Uyku süren düşük. Az uyku kas büyümesini ve yağ yakımını yarıya indirir. Antrenman yoğunluğunu artırmadan önce önce uyku süresini artır.'
+       :'\n\n⚠️ Your sleep is low. Poor sleep halves muscle growth and fat loss. Improve sleep before increasing training intensity.')
+    : '';
+
+  // ── SUPPLEMENTS ──────────────────────────────
+  const suppByBudget={
+    zero: L?'Takviye kullanmıyorsun — tamamen yiyeceklerle ilerliyorsun. Bu geçerli bir yaklaşım.\n\n⚠️ Tıbbi tavsiye değildir.'
+            :'No supplements — food-only approach. This is completely valid.\n\n⚠️ Not medical advice.',
+    low:  L?'🟡 Kreatin Monohidrat — 5g/gün. En kanıtlanmış ve ucuz takviye.\n\n⚠️ Tıbbi tavsiye değildir.'
+            :'🟡 Creatine Monohydrate — 5g/day. Most evidence-backed, very affordable.\n\n⚠️ Not medical advice.',
+    medium:L?'🟡 Kreatin Monohidrat — 5g/gün\n🟡 D Vitamini — 2000 IU/gün\n🟡 Omega-3 — 1-2 kapsül/gün\n\n⚠️ Tıbbi tavsiye değildir.'
+            :'🟡 Creatine Monohydrate — 5g/day\n🟡 Vitamin D — 2000 IU/day\n🟡 Omega-3 — 1-2 capsules/day\n\n⚠️ Not medical advice.',
+    high:  L?'🟡 Kreatin Monohidrat — 5g/gün\n🟡 D Vitamini — 2000 IU/gün\n🟡 Omega-3 — 1-2 kapsül/gün\n🟡 Whey Protein — Yeterli protein alamıyorsan\n🟡 Magnezyum — Uyku ve toparlanma için\n\n⚠️ Tıbbi tavsiye değildir.'
+            :'🟡 Creatine Monohydrate — 5g/day\n🟡 Vitamin D — 2000 IU/day\n🟡 Omega-3 — 1-2 capsules/day\n🟡 Whey Protein — If struggling to hit protein target\n🟡 Magnesium — For sleep and recovery\n\n⚠️ Not medical advice.',
+  };
+
+  return{
+    name:a.name, lang:appLang,
+    stats:{height:h,weight:w,age,goal:goalNames[a.goal]||a.goal,kcal,protein,carbs,fat,
+           tdee,targetWeight:targetW,weightDiff,weeksToGoal,
+           bmi:Math.round(bmi*10)/10,leanMass,
+           actMult:Math.round(actMult*100)/100},
+    workoutDays,
+    cardio:buildCardio(a.cardio,a.goal),
+    nutrition:{
+      strategy:(strategies[a.goal]||strategies.maintain)+sleepWarning,
+      supplements:suppByBudget[suppBudget]||suppByBudget.medium
+    },
+    answers:{...a,lang:appLang}
+  };
+}
+
+function mkDay(num,dayName,focus,sections,a,intensity,dbEq,focusMuscles,injuries,sleepMod){
+  focusMuscles=focusMuscles||['balanced'];
+  injuries=injuries||[];
+  sleepMod=sleepMod||0;
+  const L=appLang==='tr';
+  const lv=a.level||'intermediate';
+
+  const lblMap={
+    'push.chest':L?'Göğüs':'Chest','push.shoulder':L?'Omuz':'Shoulders',
+    'push.triceps':'Triceps','pull.back':L?'Sırt':'Back',
+    'pull.rear_delt':L?'Arka Omuz':'Rear Delts','pull.biceps':'Biceps',
+    'legs.quad':L?'Ön Bacak':'Quads','legs.hamstring':L?'Arka Bacak':'Hamstrings',
+    'legs.calf':L?'Baldır':'Calves','core':L?'Core & Karın':'Core & Abs'
+  };
+
+  // Focus muscle boost: if user wants arms, add extra for biceps/triceps
+  const focusBoostKeys={
+    back:['pull.back','pull.rear_delt'],shoulders:['push.shoulder','pull.rear_delt'],
+    arms:['push.triceps','pull.biceps'],chest:['push.chest'],
+    legs:['legs.quad','legs.hamstring'],core:['core']
+  };
+  const boostedKeys=new Set(focusMuscles.flatMap(f=>focusBoostKeys[f]||[]));
+
+  const sectionData=[];
+  sections.forEach(key=>{
+    const[grp,mus]=key.split('.');
+    let pool=grp==='core'?(DB.core[dbEq]||DB.core.gym||DB.core.none)
+             :((DB[grp]&&DB[grp][mus])?(DB[grp][mus][dbEq]||DB[grp][mus].gym||DB[grp][mus].none):[]);
+    pool=[...pool].sort((a,b)=>(b.best?1:0)-(a.best?1:0));
+
+    // Filter out exercises that stress injured areas
+    if(injuries.includes('knee'))
+      pool=pool.filter(e=>!['Squat','Jump Squat','Leg Extension','Walking Lunge'].some(n=>e.name.includes(n)));
+    if(injuries.includes('lower_back'))
+      pool=pool.filter(e=>!['Romanian Deadlift','Good Morning','Barbell Row'].some(n=>e.name.includes(n)));
+    if(injuries.includes('shoulder'))
+      pool=pool.filter(e=>!['Overhead','Arnold Press','Military Press'].some(n=>e.name.includes(n)));
+    if(injuries.includes('wrist'))
+      pool=pool.filter(e=>!['Barbell Curl','Skull Crusher'].some(n=>e.name.includes(n)));
+
+    const isMinorKey=MINOR.has(key);
+    const isMajorKey=MAJOR.has(key);
+    const isBoosted=boostedKeys.has(key);
+
+    // Boosted muscles get +1 exercise
+    let count=isMinorKey?1:getExCount(intensity,isMajorKey);
+    if(isBoosted&&!isMinorKey&&pool.length>count) count=Math.min(count+1,pool.length);
+    // Sleep penalty: poor sleepers get -1 on heavy days
+    if(sleepMod<0&&intensity==='heavy') count=Math.max(count-1,1);
+    count=Math.min(count,pool.length);
+
+    const exs=pool.slice(0,count).map(ex=>{
+      let sets=ex.sets;
+      if(lv==='beginner') sets=sets.replace(/4×/g,'3×').replace(/5×/g,'3×');
+      if(lv==='advanced') sets=sets.replace(/3×/g,'4×');
+      return{...ex,sets};
+    });
+    if(exs.length>0) sectionData.push({label:lblMap[key]||key,key,exercises:exs,allOptions:pool});
+  });
+
+  // Hard cap per day (sleep mod can reduce cap)
+  const caps={light:4,medium:6,heavy:8};
+  const cap=Math.max((caps[intensity]||6)+sleepMod,3);
+  let total=0;
+  const finalSecs=[];
+  for(const sec of sectionData){
+    if(total>=cap) break;
+    const left=cap-total;
+    const trimEx=sec.exercises.slice(0,Math.min(sec.exercises.length,left));
+    if(trimEx.length>0){finalSecs.push({...sec,exercises:trimEx});total+=trimEx.length;}
+  }
+
+  // Coach notes pool
+  // Coach notes - always use EN keys, map TR focus names to EN equivalents
+  const focusEN=focus
+    .replace('İTİŞ — Göğüs · Omuz · Triceps','PUSH — Chest · Shoulder · Triceps')
+    .replace('ÇEKİŞ & ALT VÜCUT','PULL & LOWER BODY')
+    .replace('ÇEKİŞ — Sırt · Biceps','PULL — Back · Biceps')
+    .replace('ALT VÜCUT & CORE','LOWER BODY & CORE')
+    .replace('UPPER A — İtiş','UPPER A — Push')
+    .replace('LOWER A — Ön Bacak','LOWER A — Quad Focus')
+    .replace('UPPER B — Çekiş','UPPER B — Pull')
+    .replace('LOWER B — Arka Bacak','LOWER B — Hamstring Focus')
+    .replace('GÖĞÜS & TRİCEPS','CHEST & TRICEPS')
+    .replace('SIRT & BİCEPS','BACK & BICEPS')
+    .replace('BACAK','LEGS')
+    .replace('OMUZ & CORE','SHOULDERS & CORE')
+    .replace('FULL BODY PUMP','FULL BODY PUMP');
+  const notes=(COACH_POOL.en&&COACH_POOL.en[focusEN])
+    ||(COACH_POOL.en&&COACH_POOL.en[Object.keys(COACH_POOL.en).find(k=>focusEN.includes(k.split(' ')[0]))||''])
+    ||['Full range, full squeeze. Every rep counts.'];
+
+  // Sleep note if needed
+  const sleepNote=(sleepMod<0)
+    ?(L?' ⚠️ Düşük uyku nedeniyle hacim azaltıldı.'
+       :' ⚠️ Volume reduced due to low sleep.'):'';
+
+  const coachNote=notes[(num+new Date().getDay())%notes.length]+sleepNote;
+  return{dayNum:num,dayName,focus,coachNote,sections:finalSecs};
+}
+
+function buildCardio(type, goal){
+  goal = goal || 'maintain';
+  // Goal-based cardio recommendations
+  const goalCardioNote = {
+    cut:         'Priority cardio for fat loss — keep intensity moderate to preserve muscle.',
+    lose_weight: 'Higher frequency recommended — cardio accelerates your calorie deficit.',
+    bulk:        'Minimal cardio to preserve calories for muscle growth. Keep sessions short.',
+    gain_weight: 'Minimal cardio — extra activity burns calories you need for weight gain.',
+    recomp:      'Cardio supports fat loss without muscle loss. Keep sessions moderate.',
+    maintain:    'Cardio for cardiovascular health and general fitness.',
+  }[goal] || '';
+
+  const plans = {
+    run: {
+      type:'Running', icon:'🏃', duration:'30-40', frequency:'2-3x / week',
+      goalNote: goalCardioNote,
+      plans:[
+        {
+          title:'Beginner: Run-Walk',
+          duration:'30 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'Brisk walk. Warm up muscles and joints gradually.'},
+            {name:'Main Set', time:'20 min', desc:'1 min jog + 2 min walk × 6-7 rounds. Each week, add 30 seconds to the run interval.'},
+            {name:'Cool-Down', time:'5 min', desc:'Slow walk + calf, hamstring, and quad stretches. Hold each 30 seconds.'},
+          ],
+          tips:'<strong>HR Target:</strong> 60-70% max HR. You should be challenged but still able to speak.'
+        },
+        {
+          title:'Intermediate: Steady State',
+          duration:'35-40 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'Easy jog to gradually raise heart rate.'},
+            {name:'Main Run', time:'25-30 min', desc:'Constant moderate pace — can speak a sentence but must pause to breathe. This is your aerobic zone.'},
+            {name:'Cool-Down', time:'5-10 min', desc:'5 min easy jog → full body stretch.'},
+          ],
+          tips:'<strong>10% Rule:</strong> Never increase weekly mileage by more than 10% — prevents injury.'
+        },
+        {
+          title:'Advanced: Intervals',
+          duration:'35 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'Easy jog + dynamic drills: high knees, leg swings, butt kicks.'},
+            {name:'Intervals ×6', time:'18 min', desc:'1 min at max effort (RPE 9) + 2 min easy jog × 6 rounds. Never fully stop during recovery — keep moving.'},
+            {name:'Cool-Down', time:'10 min', desc:'5 min easy jog + comprehensive stretching.'},
+          ],
+          tips:'<strong>Intervals vs Steady:</strong> Same time, more calories burned, higher VO2 max gains.'
+        },
+        {
+          title: goal==='cut'||goal==='lose_weight' ? 'Fat Loss Focus: Fasted Cardio' : 'Performance: Tempo Run',
+          duration: goal==='cut'||goal==='lose_weight' ? '35-40 min' : '30 min',
+          phases: goal==='cut'||goal==='lose_weight' ? [
+            {name:'When', time:'', desc:'Morning, before breakfast. Light intensity only — fasted high intensity causes muscle breakdown.'},
+            {name:'Session', time:'35-40 min', desc:'Steady pace walk or easy jog. HR at 60-65% max. This is not the time to push hard.'},
+            {name:'After', time:'', desc:'Eat a high-protein breakfast within 30 minutes.'},
+          ] : [
+            {name:'Warm-Up', time:'5 min', desc:'Easy jog.'},
+            {name:'Tempo Run', time:'20 min', desc:'Comfortably hard pace — can say a few words but not hold a conversation. Sustained effort.'},
+            {name:'Cool-Down', time:'5 min', desc:'Easy jog + stretch.'},
+          ],
+          tips: goal==='cut'||goal==='lose_weight'
+            ? '<strong>Fat loss tip:</strong> Fasted cardio increases fat oxidation, but intensity must stay low.'
+            : '<strong>Tempo runs</strong> improve your lactate threshold — the speed you can sustain for longer.'
+        },
+      ]
+    },
+
+    hiit: {
+      type:'HIIT', icon:'⚡', duration:'20-25', frequency:'2x / week',
+      goalNote: goalCardioNote,
+      plans:[
+        {
+          title:'What is HIIT?',
+          duration:'20 min',
+          phases:[
+            {name:'Definition', time:'', desc:'High-Intensity Interval Training: short maximal effort + short rest cycles. Creates 3× more post-workout calorie burn (EPOC) vs steady-state. Maximum 2x/week — recovery is essential.'},
+            {name:'Warm-Up', time:'5 min', desc:'Jumping jacks × 30, high knees × 30, leg swings × 10 each direction, arm circles.'},
+            {name:'Tabata ×4 rounds', time:'16 min', desc:'4 exercises × 4 rounds. Each: 20s max effort + 10s rest. Order: Squat Jump → Burpee → Mountain Climber → High Knees.'},
+            {name:'Cool-Down', time:'5 min', desc:'Slow walk + full body stretching.'},
+          ],
+          tips:'<strong>Warning:</strong> 2x HIIT/week is enough. More than that impairs recovery and increases injury risk.'
+        },
+        {
+          title:'EMOM Protocol',
+          duration:'20 min',
+          phases:[
+            {name:'What is EMOM?', time:'', desc:'Every Minute On the Minute — start the movement at the top of each minute, rest for the remainder. The faster you finish, the more rest you earn.'},
+            {name:'20 Min Program', time:'20 min', desc:'Min 1,5,9,13,17: 12 Squat Jumps | Min 2,6,10,14,18: 10 Burpees | Min 3,7,11,15,19: 20 Mountain Climbers | Min 4,8,12,16,20: 15 High Knees.'},
+          ],
+          tips:'<strong>Tip:</strong> Use a timer app. Reduce reps when fatigued but keep the format.'
+        },
+        {
+          title: goal==='cut'||goal==='lose_weight' ? 'Fat Loss HIIT Protocol' : 'Athletic HIIT',
+          duration:'22 min',
+          phases: goal==='cut'||goal==='lose_weight' ? [
+            {name:'Why HIIT for Fat Loss', time:'', desc:'HIIT elevates metabolism for 24-48 hours after the session. This "afterburn" effect burns extra calories even at rest.'},
+            {name:'Warm-Up', time:'5 min', desc:'Light cardio + mobility work.'},
+            {name:'Protocol', time:'12 min', desc:'30s on / 30s off × 12 rounds. Exercises: Sprint in place, Jump squat, Burpee, Mountain climber. Rotate each round.'},
+            {name:'Cool-Down', time:'5 min', desc:'Slow walk + full stretch.'},
+          ] : [
+            {name:'Warm-Up', time:'5 min', desc:'Dynamic warm-up: leg swings, hip circles, light jog.'},
+            {name:'Athletic Circuit', time:'15 min', desc:'3 rounds of: Box jumps × 10, Sprint 20m × 4, Lateral bounds × 10, Med ball slam × 10. 60s rest between rounds.'},
+            {name:'Cool-Down', time:'5 min', desc:'Static stretching.'},
+          ],
+          tips: goal==='cut'||goal==='lose_weight'
+            ? '<strong>Maximize fat loss:</strong> Do HIIT on non-lifting days for best results.'
+            : '<strong>Athletic HIIT</strong> improves power, speed, and cardiovascular capacity simultaneously.'
+        },
+      ]
+    },
+
+    walk: {
+      type:'Walking', icon:'🚶', duration:'40-50', frequency:'3-4x / week',
+      goalNote: goalCardioNote,
+      plans:[
+        {
+          title:'Brisk Walking',
+          duration:'40-50 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'Start slow and gradually increase pace.'},
+            {name:'Main Walk', time:'30-40 min', desc:'Brisk pace — aim to lightly sweat. Swing arms actively to increase calorie burn. Target 7000+ steps if you have a counter.'},
+            {name:'Cool-Down', time:'5 min', desc:'Slow down + calf and hip flexor stretches.'},
+          ],
+          tips:'<strong>Incline Walk:</strong> 8-12% grade on treadmill at 3-3.5 mph — dramatically more calories with zero joint impact.'
+        },
+        {
+          title: goal==='cut'||goal==='lose_weight' ? 'High-Calorie Walking Protocol' : 'Nordic Walking',
+          duration:'45-60 min',
+          phases: goal==='cut'||goal==='lose_weight' ? [
+            {name:'Why Long Walks', time:'', desc:'LISS (Low Intensity Steady State) cardio: easy on the joints, burns fat without spiking cortisol, and does not impair muscle recovery. Perfect complement to weight training.'},
+            {name:'Session', time:'45-60 min', desc:'Fast-paced walk with slight incline if possible. Aim for 8000-10000 steps. Listen to podcasts — make it enjoyable.'},
+            {name:'Frequency', time:'', desc:'Can be done 4-5x/week without affecting recovery — unlike running or HIIT.'},
+          ] : [
+            {name:'Technique', time:'', desc:'Walking with poles — arms engage every step. Burns 40% more calories than regular walking, strengthens upper back and shoulders.'},
+            {name:'Session', time:'45 min', desc:'5 min normal walk → 35 min nordic technique → 5 min cool down.'},
+          ],
+          tips: goal==='cut'||goal==='lose_weight'
+            ? '<strong>Walking is underrated for fat loss.</strong> 10,000 steps/day burns 300-500 extra calories with zero recovery cost.'
+            : '<strong>No poles?</strong> Active arm swing walking is the foundation of nordic walking — works without equipment.'
+        },
+      ]
+    },
+
+    bike: {
+      type:'Cycling', icon:'🚴', duration:'30-45', frequency:'2-3x / week',
+      goalNote: goalCardioNote,
+      plans:[
+        {
+          title:'Steady State Cycling',
+          duration:'35-40 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'Low resistance, easy pedaling to warm up joints.'},
+            {name:'Main Session', time:'25-30 min', desc:'Medium resistance, constant pace. Keep HR at 65-75% max. Outdoors or on a stationary bike.'},
+            {name:'Cool-Down', time:'5-10 min', desc:'Lower resistance, slow down → quad and calf stretches.'},
+          ],
+          tips:'<strong>Joint-friendly advantage:</strong> Best running alternative for knee, hip, or back issues. Can do longer sessions than running.'
+        },
+        {
+          title:'Spinning Intervals',
+          duration:'35 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'Light resistance.'},
+            {name:'Intervals ×10', time:'25 min', desc:'30s max sprint (high resistance) + 90s easy pedaling × 10 rounds. Total 20 minutes of intervals.'},
+            {name:'Cool-Down', time:'5 min', desc:'Easy pedaling + stretching.'},
+          ],
+          tips:'<strong>Spinning class tip:</strong> Instructor-led sessions with music increase effort by 15-20% vs solo training.'
+        },
+        {
+          title: goal==='bulk'||goal==='gain_weight' ? 'Minimal Cardio Protocol' : 'Endurance Build',
+          duration: goal==='bulk'||goal==='gain_weight' ? '20-25 min' : '45-60 min',
+          phases: goal==='bulk'||goal==='gain_weight' ? [
+            {name:'Why Minimal', time:'', desc:'Too much cardio when bulking burns calories needed for muscle growth and elevates cortisol. Keep it short and low intensity.'},
+            {name:'Session', time:'20-25 min', desc:'Light cycling at 50-60% max HR. Just enough to keep cardiovascular health without burning excess calories.'},
+            {name:'Frequency', time:'', desc:'1-2x per week maximum when in a surplus phase.'},
+          ] : [
+            {name:'Warm-Up', time:'10 min', desc:'Easy pedaling, gradually increase resistance.'},
+            {name:'Endurance Block', time:'35-45 min', desc:'Moderate resistance, steady pace. Focus on maintaining consistent cadence (80-90 RPM). This builds aerobic base.'},
+            {name:'Cool-Down', time:'5-10 min', desc:'Easy pedaling + full leg stretches.'},
+          ],
+          tips: goal==='bulk'||goal==='gain_weight'
+            ? '<strong>Bulking rule:</strong> Cardio is optional. If you do it, keep sessions under 25 min and intensity low.'
+            : '<strong>Aerobic base:</strong> Building endurance first makes interval training more effective.'
+        },
+      ]
+    },
+
+    swim: {
+      type:'Swimming', icon:'🏊', duration:'30-40', frequency:'2x / week',
+      goalNote: goalCardioNote,
+      plans:[
+        {
+          title:'Beginner Swimming Program',
+          duration:'30-35 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'200m freestyle very slowly. Focus on technique — face in water, breathe to the side. Watch tutorial videos before your first session.'},
+            {name:'Main Set', time:'20 min', desc:'6 × 50m freestyle. 30s rest after each 50m. From week 2, reduce rest to 20s. From week 4, try 100m intervals.'},
+            {name:'Cool-Down', time:'5 min', desc:'100m very slowly. Let breathing fully normalize.'},
+          ],
+          tips:'<strong>Technique first:</strong> Face must go in water, breathe to the side. Without technique, you cannot build endurance in swimming.'
+        },
+        {
+          title:'Intermediate: Mixed Strokes',
+          duration:'40 min',
+          phases:[
+            {name:'Warm-Up', time:'5 min', desc:'200m freestyle.'},
+            {name:'Main Set', time:'30 min', desc:'400m freestyle + 200m breaststroke + 200m backstroke. 45s rest between strokes. Total 800m. Adjust distances to your current fitness.'},
+            {name:'Cool-Down', time:'5 min', desc:'100m very slow, any stroke you prefer.'},
+          ],
+          tips:'<strong>Swimming advantage:</strong> Full body, zero joint impact, natural heat regulation. Lowest injury risk of any cardio form.'
+        },
+        {
+          title: goal==='cut'||goal==='lose_weight' ? 'High-Calorie Swim Protocol' : 'Endurance Intervals',
+          duration:'40-45 min',
+          phases: goal==='cut'||goal==='lose_weight' ? [
+            {name:'Why Swimming for Fat Loss', time:'', desc:'Swimming burns 400-700 calories/hour while being completely joint-free. Cold water exposure also slightly increases metabolic rate.'},
+            {name:'Protocol', time:'35 min', desc:'Warm-up 200m → 6 × 100m with 20s rest → 200m cool down. Focus on keeping pace consistent throughout.'},
+            {name:'Frequency Tip', time:'', desc:'Swimming 3x/week is highly effective for fat loss without the impact stress of running.'},
+          ] : [
+            {name:'Warm-Up', time:'5 min', desc:'200m easy freestyle.'},
+            {name:'Interval Set', time:'30 min', desc:'8 × 50m at hard effort (RPE 8) + 30s rest. Then 4 × 100m at moderate pace + 20s rest.'},
+            {name:'Cool-Down', time:'5 min', desc:'Easy 200m any stroke.'},
+          ],
+          tips: goal==='cut'||goal==='lose_weight'
+            ? '<strong>Tip:</strong> Swim before breakfast occasionally for enhanced fat oxidation.'
+            : '<strong>Interval swimming</strong> significantly improves both cardiovascular capacity and stroke efficiency.'
+        },
+      ]
+    },
+  };
+  return plans[type] || null;
+}
+
+function buildNutrition(kcal,protein,carbs,fat,mealCount,goal,bmi,a){
+  // BMI-aware strategy text
+  const bmiVal=Math.round((parseFloat(a.weight)/((parseFloat(a.height)/100)**2))*10)/10;
+  const bmiNote=bmiVal>=30?' (Yüksek vücut yağına göre kalori açığı artırıldı.)':
+                bmiVal>=25?' (Hafif kilolu için açık optimize edildi.)':'';
+  const strats={
+    bulk:bmiVal>=27?
+      `Vücut yağın yüksek olduğu için küçük kalori fazlası (+150 kcal) uygulandı. Önce yağı azalt, sonra bulk yap.${bmiNote}`:
+      'Bakım kalorinin üstünde ~350 kcal fazla alıyorsun. Temiz bulk — haftada 0.3-0.5 kg artış hedefle.',
+    cut:`Kalori açığın vücut yağına göre ayarlandı.${bmiNote} Protein yağsız kütlene göre hesaplandı.`,
+    gain_weight:bmiVal>=27?
+      'Kilonu artırmak istiyorsun ama vücut yağın zaten yüksek. Önce rekomp düşünebilirsin.':
+      'Kalori fazlan yüksek. Günde 3-4 saatte bir ye.',
+    lose_weight:`Kalori açığın vücut yağına göre belirlendi.${bmiNote} Yüksek protein kas kaybını önler.`,
+    recomp:bmiVal>=30?
+      `Yüksek vücut yağında rekomp için kalori açığı (-400 kcal) uygulandı.${bmiNote}`:
+      bmiVal>=25?'Hafif kalori açığıyla hem yağ yakıyorsun hem kas yapıyorsun.':
+      'Bakım kalorisi. Antrenman günleri karbı artır, dinlenme günleri azalt.',
+    maintain:'Formu koruma kalorisi. Protein her öğünde olsun.'
+  };
+  const supplements='🟡 Kreatin Monohidrat — 5g/gün (zamanlama önemsiz).\n🟡 D Vitamini — 2000 IU/gün.\n🟡 Omega-3 — Haftada 3 kez balık yemiyorsan 1-2 kapsül/gün.\n⚪ Whey Protein — zorunlu değil.\n\n⚠️ Bu bilgiler tıbbi tavsiye değildir.';
+  return {strategy:strats[goal]||strats.maintain, supplements};
+}
+
+// ═══════════════════════════════════════════════
+// WIZARD
+// ═══════════════════════════════════════════════
+let appLang = 'en';
+
+
+
+function updateLangText(){
+  const isEn = appLang === 'en';
+  const onbHero = document.querySelector('.onb-hero');
+  if(onbHero) onbHero.innerHTML = isEn
+    ? 'Your personal<br><span class="hl">AI fitness coach</span>'
+    : 'Your personal<br><span class="hl">AI fitness coach</span>';
+  const onbSub = document.querySelector('.onb-sub');
+  if(onbSub) onbSub.textContent = isEn
+    ? 'Answer a few questions. Get a personalized workout, nutrition, and cardio plan instantly. Free, offline, saved on your device.'
+    : 'Answer a few questions. Anında kişisel antrenman, beslenme ve kardiyo planı oluşsun. Ücretsiz, internet gerekmez.';
+  const cta = document.querySelector('.cta-btn');
+  if(cta) cta.textContent = isEn ? 'Build My Program →' : 'Build My Program →';
+}
+
+function openLangSwitch(){
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML=`<div style="background:var(--bg1);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;width:100%;max-width:320px">
+    <div style="font-size:18px;font-weight:700;margin-bottom:16px;text-align:center">Select Language</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div onclick="setLang('en');this.closest('[style]').remove()" style="background:var(--bg2);border:2px solid ${appLang==='en'?'var(--accent)':'var(--border)'};border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;touch-action:manipulation">
+        <span style="font-size:24px">🇬🇧</span><div><div style="font-weight:700">English</div><div style="font-size:12px;color:var(--sub)">Continue in English</div></div>
+      </div>
+      <div onclick="setLang('tr');this.closest('[style]').remove()" style="background:var(--bg2);border:2px solid ${appLang==='tr'?'var(--accent)':'var(--border)'};border-radius:12px;padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;touch-action:manipulation">
+        <span style="font-size:24px">🇹🇷</span><div><div style="font-weight:700">Türkçe</div><div style="font-size:12px;color:var(--sub)">Continue in Turkish</div></div>
+      </div>
+    </div>
+    <button onclick="this.closest('[style]').remove()" style="background:none;border:1px solid var(--border);color:var(--sub);width:100%;padding:10px;border-radius:8px;margin-top:12px;cursor:pointer;font-family:var(--font);touch-action:manipulation">Cancel</button>
+  </div>`;
+  overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};
+  document.body.appendChild(overlay);
+}
+
+function setLang(l){
+  appLang=l;
+  localStorage.setItem('ait_lang',l);
+  const lb=document.getElementById('langLabel');
+  if(lb)lb.textContent=l.toUpperCase();
+  // If on lang screen, go to onboard
+  if(document.getElementById('s-lang').classList.contains('active')){
+    showScreen('s-onboard');
+  }
+  // Rebuild wizard if active
+  if(document.getElementById('s-wizard').classList.contains('active')){
+    renderStep();
+  }
+  // Reload app if built
+  if(program){program=buildProgram(answers);localStorage.setItem('ak_v5',JSON.stringify(program));loadApp();}
+}
+
+function toggleLang(){
+  setLang(appLang==='tr'?'en':'tr');
+}
+
+function checkExisting(){
+  const savedLang=localStorage.getItem('ait_lang');
+  if(savedLang){appLang=savedLang;}
+  try{
+    const s=localStorage.getItem('ak_v5');
+    if(s){
+      program=JSON.parse(s);
+      answers=program.answers||{};
+      appLang=program.answers?.lang||savedLang||'en';
+      localStorage.setItem('ait_lang',appLang);
+      loadApp();return;
+    }
+  }catch(e){}
+  if(!savedLang){showScreen('s-lang');}
+  else{showScreen('s-onboard');}
+}
+
+function startWizard(){currentStep=0;answers={};renderStep();showScreen('s-wizard');}
+
+function renderStep(){
+  const s=STEPS[currentStep];
+  // Support function-based q/hint/opts
+  const q=typeof s.q==='function'?s.q():s.q;
+  const hint=typeof s.hint==='function'?s.hint():s.hint;
+  const opts=typeof s.opts==='function'?s.opts():(s.opts||[]);
+
+  const pct=currentStep/STEPS.length*100;
+  document.getElementById('wizFill').style.width=pct+'%';
+  document.getElementById('stepLabel').textContent=(appLang==='tr'?'Step ':'Step ')+(currentStep+1)+' / '+STEPS.length;
+  document.getElementById('btnBack').style.visibility=currentStep===0?'hidden':'visible';
+  document.getElementById('btnNext').textContent=appLang==='tr'?'Devam →':'Continue →';
+
+  let h=`<h2 class="step-q">${q}</h2><p class="step-hint">${hint}</p>`;
+
+  if(s.type==='text'){
+    h+='<div class="inp-group"><div class="inp-row">';
+    s.fields.forEach(f=>{
+      const lbl=typeof f.label==='function'?f.label():f.label;
+      const val=answers[f.id]||'';
+      h+=`<div class="inp-field">
+        <label class="inp-label">${lbl}</label>
+        <input class="inp" id="inp_${f.id}" type="text" inputmode="${f.inputmode||'text'}"
+          placeholder="${f.placeholder}" value="${val}" autocomplete="off" autocorrect="off"
+          autocapitalize="${f.inputmode==='text'?'words':'off'}"
+          oninput="validateStep()"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();if(!document.getElementById('btnNext').disabled)wizNext();}">
+      </div>`;
+    });
+    h+='</div>';
+    if(s.id==='body') h+='<div class="inp-hint" id="bmiHint"></div>';
+    h+='</div>';
+  } else if(s.type==='multi'){
+    h+='<div class="opts">';
+    opts.forEach(o=>{
+      const sel=(answers[s.id]||[]).includes(o.v)?'selected':'';
+      h+=`<button class="opt ${sel}" onclick="toggleMulti('${s.id}','${o.v}',this)">
+        <div class="opt-check">${sel?'✓':''}</div>
+        <div><div class="opt-label">${o.label}</div>${o.sub?`<div class="opt-sub">${o.sub}</div>`:''}</div>
+      </button>`;
+    });
+    h+='</div>';
+  } else {
+    h+='<div class="opts">';
+    opts.forEach(o=>{
+      const sel=answers[s.id]===o.v?'selected':'';
+      h+=`<button class="opt ${sel}" onclick="selectOpt('${s.id}','${o.v}',this)">
+        <div class="opt-check">${sel?'✓':''}</div>
+        <div><div class="opt-label">${o.label}</div>${o.sub?`<div class="opt-sub">${o.sub}</div>`:''}</div>
+      </button>`;
+    });
+    h+='</div>';
+  }
+
+  if(s.showTarget){
+    h+=`<div class="tw-box" id="twBox">
+      <div class="tw-box-label">${appLang==='tr'?'🎯 Hedef Kilo (isteğe bağlı)':'🎯 Target Weight (optional)'}</div>
+      <input class="inp" id="inp_target_weight" type="text" inputmode="decimal"
+        placeholder="${appLang==='tr'?'Örn: 75':'e.g. 75'}" value="${answers.target_weight||''}"
+        oninput="updateTwHint()"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();if(!document.getElementById('btnNext').disabled)wizNext();}">
+      <div class="inp-hint" id="twHint"></div>
+    </div>`;
+  }
+
+  document.getElementById('wizContent').innerHTML=h;
+  validateStep();
+  const fi=document.querySelector('.inp');
+  if(fi) setTimeout(()=>fi.focus(),80);
+  if(s.id==='body') updateBmiHint();
+}
+
+function updateBmiHint(){
+  const h=parseFloat(document.getElementById('inp_height')?.value)||0;
+  const w=parseFloat(document.getElementById('inp_weight')?.value)||0;
+  const el=document.getElementById('bmiHint');
+  if(!el)return;
+  if(h>0&&w>0){
+    const bmi=Math.round(w/((h/100)*(h/100))*10)/10;
+    let cat='Normal';
+    if(bmi<18.5)cat='Zayıf';
+    else if(bmi<25)cat='Normal ✅';
+    else if(bmi<30)cat='Fazla Kilolu';
+    else cat='Obez';
+    el.textContent=`VKİ: ${bmi} — ${cat}`;
+    el.style.color=bmi>=18.5&&bmi<25?'#6a9a3a':'var(--muted)';
+  }else{
+    el.textContent='';
+  }
+}
+
+function updateWeightTarget(){
+  const tw=parseFloat(document.getElementById('inp_target_weight')?.value)||0;
+  const w=parseFloat(answers.weight)||parseFloat(document.getElementById('inp_weight')?.value)||0;
+  const el=document.getElementById('weightTargetHint');
+  if(!el)return;
+  if(tw>0&&w>0){
+    const diff=Math.round((tw-w)*10)/10;
+    const goal=answers.goal;
+    const weekly={bulk:0.35,gain_weight:0.5,cut:-0.45,lose_weight:-0.6}[goal]||0;
+    if(weekly!==0){
+      const weeks=Math.abs(Math.round(diff/weekly));
+      const dir=diff>0?'+'+diff:''+diff;
+      el.textContent=`${dir} kg → Tahminen ~${weeks} hafta`;
+    }else{
+      el.textContent='';
+    }
+    answers.target_weight=tw.toString();
+  }
+}
+
+function validateStep(){
+  const s=STEPS[currentStep];
+  let valid=false;
+  if(s.type==='text'){
+    valid=s.fields.every(f=>{
+      const el=document.getElementById('inp_'+f.id);
+      if(!el||!el.value.trim()) return false;
+      if(f.min!==undefined||f.max!==undefined){
+        const v=parseFloat(el.value);
+        if(isNaN(v)) return false;
+        if(f.min!==undefined&&v<f.min) return false;
+        if(f.max!==undefined&&v>f.max) return false;
+      }
+      return true;
+    });
+    if(s.id==='body') updateBmiHint();
+  } else if(s.type==='multi'){
+    valid=(answers[s.id]||[]).length>0;
+  } else {
+    valid=answers[s.id]!==undefined;
+  }
+  document.getElementById('btnNext').disabled=!valid;
+}
+
+function selectOpt(key,val,btn){
+  answers[key]=val;
+  document.querySelectorAll('.opts .opt').forEach(b=>{b.classList.remove('selected');b.querySelector('.opt-check').textContent='';});
+  btn.classList.add('selected');btn.querySelector('.opt-check').textContent='✓';
+  validateStep();
+  // Target weight always shown on goal step
+  if(key==='goal'){
+    const tw=document.getElementById('targetWrap');
+    if(tw) tw.classList.add('show');
+    updateWeightTarget();
+  }
+}
+
+function wizNext(){
+  const s=STEPS[currentStep];
+  if(s.type==='text') s.fields.forEach(f=>{const el=document.getElementById('inp_'+f.id);if(el)answers[f.id]=el.value.trim();});
+  if(s.showTarget){const el=document.getElementById('inp_target_weight');if(el&&el.value.trim())answers.target_weight=el.value.trim();}
+
+  if(currentStep<STEPS.length-1){currentStep++;renderStep();}
+  else{
+    showScreen('s-generating');
+    const genStepsTxt=appLang==='tr'
+      ?['Profilin analiz ediliyor...','Aktivite seviyesi hesaplanıyor...','Egzersizler seçiliyor...','Odak kaslar ayarlanıyor...','Kalori hesaplanıyor...','Beslenme planı hazırlanıyor...','Program tamamlanıyor...']
+      :['Analyzing your profile...','Calculating activity level...','Selecting exercises...','Adjusting for focus muscles...','Calculating calories...','Building nutrition plan...','Finalizing program...'];
+    const stepsEl=document.getElementById('genSteps');
+    stepsEl.innerHTML=genStepsTxt.map((s,i)=>`<div class="gen-step" id="gs${i}"><div class="gen-step-dot"></div><span>${s}</span></div>`).join('');
+    let si=0;
+    const activate=()=>{if(si>0){const p=document.getElementById('gs'+(si-1));if(p){p.classList.remove('active');p.classList.add('done');}}const c=document.getElementById('gs'+si);if(c)c.classList.add('active');si++;};
+    activate();
+    const iv=setInterval(()=>{if(si<genStepsTxt.length)activate();},350);
+    setTimeout(()=>{
+      clearInterval(iv);
+      genStepsTxt.forEach((_,i)=>{const el=document.getElementById('gs'+i);if(el){el.classList.remove('active');el.classList.add('done');}});
+      try{
+        program=buildProgram(answers);
+        localStorage.setItem('ak_v5',JSON.stringify(program));
+        loadApp();
+      }catch(err){
+        console.error(err);
+        document.getElementById('genStatus').textContent='Error: '+err.message;
+        const rb=document.createElement('button');
+        rb.className='cta-btn';rb.style.marginTop='20px';rb.style.maxWidth='280px';
+        rb.textContent=appLang==='tr'?'Geri Dön':'Go Back';
+        rb.onclick=()=>showScreen('s-wizard');
+        document.querySelector('.gen-screen').appendChild(rb);
+      }
+    },2000);
+  }
+}
+
+function wizBack(){if(currentStep>0){currentStep--;renderStep();}}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const target=document.getElementById(id);
+  if(target) target.classList.add('active');
+  // topbar settings button
+  const sb=document.getElementById('settingsBtn-top');
+  if(sb) sb.style.display=id==='s-app'?'flex':'none';
+  // sidebar settings button
+  const sb2=document.getElementById('settingsBtn-side');
+  if(sb2) sb2.style.display=id==='s-app'?'flex':'none';
+  if(typeof updateDesktopNav==='function') updateDesktopNav(id);
+}
+
+function updateDesktopNav(screenId){
+  const nav=document.getElementById('desktopNav');
+  if(!nav)return;
+  if(screenId!=='s-app'||!program){nav.style.display='none';return;}
+  nav.style.display='flex';
+  nav.innerHTML='';
+  const items=[];
+  (program.workoutDays||[]).forEach((day,i)=>items.push({id:'day'+i,label:day.dayName}));
+  if(program.cardio)items.push({id:'cardio',label:program.cardio.type});
+  items.push({id:'beslenme',label:'NUTRITION',html:renderNutritionPanel(program)});
+  items.push({id:'profil',label:'PROFILE',html:renderProfilePanel(program)});
+  items.forEach(item=>{
+    const btn=document.createElement('button');
+    btn.className='hdr-nav-item';
+    btn.textContent=item.label;
+    btn.onclick=()=>{
+      document.querySelectorAll('.tab,.hdr-nav-item').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      // sync tab too
+      document.querySelectorAll('.tab').forEach(t=>{if(t.textContent===item.label||t.dataset.panelId===item.id)t.classList.add('active');});
+      document.getElementById('p_'+item.id)?.classList.add('active');
+    };
+    nav.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════
+function loadApp(){
+  if(!program)return;
+  const tabsEl=document.getElementById('appTabs');
+  const panelsEl=document.getElementById('appPanels');
+  tabsEl.innerHTML='';panelsEl.innerHTML='';
+  const items=[];
+  (program.workoutDays||[]).forEach((day,i)=>items.push({id:'day'+i,label:day.dayName,html:renderDayPanel(day,i)}));
+  if(program.cardio){
+    const cLabel={'Koşu':'RUN','Running':'RUN','HIIT':'HIIT','Yürüyüş':'WALK','Walking':'WALK','Bisiklet':'BIKE','Cycling':'BIKE','Yüzme':'SWIM','Swimming':'SWIM'}[program.cardio.type]||program.cardio.type.substring(0,5).toUpperCase();
+    items.push({id:'cardio',label:cLabel,html:renderCardioPanel(program.cardio)});
+  }
+  items.push({id:'beslenme',label:'NUTRITION',html:renderNutritionPanel(program)});
+  items.push({id:'profil',label:'PROFILE',html:renderProfilePanel(program)});
+  items.forEach((item,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tab'+(i===0?' active':'');
+    btn.textContent=item.label;
+    btn.dataset.panelId=item.id;
+    btn.onclick=()=>{
+      document.querySelectorAll('.tab,.snav-item').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('p_'+item.id)?.classList.add('active');
+    };
+    tabsEl.appendChild(btn);
+    const div=document.createElement('div');
+    div.className='panel'+(i===0?' active':'');
+    div.id='p_'+item.id;
+    div.innerHTML=item.html||'';
+    panelsEl.appendChild(div);
+  });
+  showScreen('s-app');
+}
+
+function renderMuscleBars(muscles){
+  if(!muscles||!muscles.length)return'';
+  let h='<div class="muscle-bars">';
+  muscles.forEach(m=>{
+    const color=m.primary?'var(--accent)':'#555';
+    h+=`<div class="muscle-row"><span class="muscle-name">${muscleName(m.n)}</span><div class="muscle-bar-bg"><div class="muscle-bar-fill" style="width:${m.p}%;background:${color}"></div></div><span class="muscle-pct">%${m.p}</span></div>`;
+  });
+  return h+'</div>';
+}
+
+function renderDayPanel(day,idx){
+  const total=(day.sections||[]).reduce((s,sec)=>s+(sec.exercises||[]).length,0);
+  let h=`<div class="day-hdr"><div><div class="day-name">${day.dayName}</div><div class="day-focus">${day.focus}</div></div><div><div class="day-prog-num" id="prog_d${idx}">0/${total}</div><div class="day-prog-lbl">Tamamlanan</div></div></div><div class="prog-bar"><div class="prog-fill" id="bar_d${idx}"></div></div>`;
+  if(day.coachNote)h+=`<div class="tip"><div class="tip-lbl">⚡ Koç Notu</div><div class="tip-txt">${day.coachNote}</div></div>`;
+  (day.sections||[]).forEach((sec,si)=>{
+    h+=`<div class="sec-lbl">${sec.label}</div>`;
+    (sec.exercises||[]).forEach((ex,ei)=>{
+      const hasAlts=(sec.allOptions||[]).length>1;
+      h+=`<div class="ex" id="ex_d${idx}_${si}_${ei}">
+        <div class="ex-stripe"></div>
+        <div class="ex-tap" onclick="toggleEx(${idx},${si},${ei})">
+          <div class="ex-name">${ex.best?'<span class="optimal-badge">Optimal</span>&nbsp;':''}<span class="ex-name-text">${ex.name}</span></div>
+          <div class="ex-sets">${ex.sets}</div>
+          <div class="chk">✓</div>
+        </div>
+        <div class="ex-note">${ex.note||''}</div>
+        ${renderMuscleBars(ex.muscles)}
+        <div class="ex-footer">
+          ${hasAlts?`<button class="swap-btn" onclick="openSwap(${idx},${si},${ei})">🔄 Değiştir</button>`:''}
+        </div>
+      </div>`;
+    });
+  });
+  h+=`<div class="complete-banner" id="complete_d${idx}">
+    <div class="cb-emoji">🔥</div>
+    <div class="cb-title">${day.dayName} TAMAMLANDI!</div>
+    <div class="cb-sub">Harika antrenman! Şimdi dinlen ve iyi beslen.<br>Kasların bu dinlenme sürecinde büyür.</div>
+    <div class="cb-stats">
+      <div><div class="cb-stat-val">${total}</div><div class="cb-stat-lbl">Hareket</div></div>
+      <div><div class="cb-stat-val">💪</div><div class="cb-stat-lbl">Tamamlandı</div></div>
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetDay(${idx})">↺ Günü Sıfırla</button>
+  <div class="disclaimer"><div class="disclaimer-title">⚠️ Sorumluluk Hatırlatması</div>Bu antrenman yapay zeka tarafından oluşturulmuştur. Bireysel sağlık durumunuzu dikkate almaz. Egzersiz sırasında ağrı hissederseniz durdurun.</div>`;
+  return h;
+}
+
+function toggleEx(dayIdx,secIdx,exIdx){
+  const el=document.getElementById('ex_d'+dayIdx+'_'+secIdx+'_'+exIdx);
+  if(!el)return;
+  el.classList.toggle('done');
+  updateProgress(dayIdx);
+}
+
+function updateProgress(dayIdx){
+  const panel=document.getElementById('p_day'+dayIdx);
+  if(!panel)return;
+  const allEx=panel.querySelectorAll('.ex');
+  const done=panel.querySelectorAll('.ex.done').length;
+  const total=allEx.length;
+  const bar=document.getElementById('bar_d'+dayIdx);
+  const prog=document.getElementById('prog_d'+dayIdx);
+  const banner=document.getElementById('complete_d'+dayIdx);
+  if(bar)bar.style.width=(total?Math.round(done/total*100):0)+'%';
+  if(prog)prog.textContent=done+'/'+total;
+  if(banner){
+    if(done===total&&total>0){banner.classList.add('show');setTimeout(()=>banner.scrollIntoView({behavior:'smooth',block:'nearest'}),100);}
+    else banner.classList.remove('show');
+  }
+}
+
+function resetDay(dayIdx){
+  const panel=document.getElementById('p_day'+dayIdx);
+  if(!panel)return;
+  panel.querySelectorAll('.ex').forEach(e=>e.classList.remove('done'));
+  updateProgress(dayIdx);
+}
+
+function openSwap(dayIdx,secIdx,exIdx){
+  swapDayIdx=dayIdx;swapSecIdx=secIdx;swapExIdx=exIdx;
+  const sec=program.workoutDays[dayIdx].sections[secIdx];
+  const cur=sec.exercises[exIdx];
+  document.getElementById('swapTitle').textContent='Swap Exercises — '+sec.label;
+  document.getElementById('swapSub').textContent='Mevcut: '+cur.name+' · Alternatif seç:';
+  let h='';
+  (sec.allOptions||[]).forEach(ex=>{
+    const isCur=ex.name===cur.name;
+    const safeN=ex.name.replace(/'/g,"\\'");
+    h+=`<div class="swap-ex ${isCur?'is-current':''}" onclick="${isCur?'':('doSwap(\''+safeN+'\')')}">
+      <div class="swap-ex-top">
+        <div class="swap-ex-name">${ex.best?'⭐ ':''}<strong>${ex.name}</strong>${isCur?' <span style="color:var(--muted);font-size:11px">(mevcut)</span>':''}</div>
+        <div class="swap-ex-sets">${ex.sets||''}</div>
+      </div>
+      <div class="swap-ex-note">${ex.note||''}</div>`;
+    (ex.muscles||[]).forEach(m=>{
+      const color=m.primary?'var(--accent)':'#555';
+      h+=`<div class="swap-mr"><span class="swap-mn">${muscleName(m.n)}</span><div class="swap-mbg"><div class="swap-mf" style="width:${m.p}%;background:${color}"></div></div><span class="swap-mp">%${m.p}</span></div>`;
+    });
+    h+='</div>';
+  });
+  document.getElementById('swapContent').innerHTML=h;
+  document.getElementById('swapModal').classList.add('open');
+}
+
+function doSwap(exName){
+  const sec=program.workoutDays[swapDayIdx].sections[swapSecIdx];
+  const newEx=sec.allOptions.find(e=>e.name===exName);
+  if(!newEx)return;
+  let sets=newEx.sets;
+  const lv=answers.level||'intermediate';
+  if(lv==='beginner') sets=sets.replace(/4×/g,'3×');
+  if(lv==='advanced') sets=sets.replace(/3×/g,'4×');
+  // save done state
+  const panel=document.getElementById('p_day'+swapDayIdx);
+  const doneIds=new Set();
+  if(panel) panel.querySelectorAll('.ex.done').forEach(el=>doneIds.add(el.id));
+  sec.exercises[swapExIdx]={...newEx,sets};
+  localStorage.setItem('ak_v5',JSON.stringify(program));
+  closeSwap();
+  if(panel){
+    panel.innerHTML=renderDayPanel(program.workoutDays[swapDayIdx],swapDayIdx);
+    doneIds.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('done');});
+    updateProgress(swapDayIdx);
+  }
+}
+
+function closeSwap(){document.getElementById('swapModal').classList.remove('open');}
+
+function renderCardioPanel(c){
+  const L=appLang==='tr';
+  let h=`<div class="cardio-card">
+    <div style="font-size:42px;margin-bottom:10px">${c.icon||'🏃'}</div>
+    <div class="cardio-title">${c.type}</div>
+    <div class="cardio-sub">${c.frequency} · ${c.duration} min</div>
+    <div class="cardio-stats">
+      <div class="cardio-stat"><div class="cardio-stat-val">${c.duration}</div><div class="cardio-stat-lbl">Minutes</div></div>
+      <div class="cardio-stat"><div class="cardio-stat-val">MOD</div><div class="cardio-stat-lbl">Intensity</div></div>
+    </div>
+  </div>
+  ${c.goalNote?`<div class="coach-note" style="margin:0 20px 0"><div class="coach-lbl">🎯 GOAL NOTE</div><div class="coach-txt">${c.goalNote}</div></div>`:''}`;
+  if(c.plans&&c.plans.length>0){
+    h+=`<div class="sec-lbl">${L?'WORKOUT PLANS':'WORKOUT PLANS'}</div>`;
+    c.plans.forEach((plan,pi)=>{
+      h+=`<div class="cardio-var" style="margin-bottom:10px;padding:0;overflow:hidden">
+        <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">
+          <div style="width:26px;height:26px;background:var(--accent);color:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${pi+1}</div>
+          <div style="font-size:14px;font-weight:600;flex:1">${plan.title}</div>
+          ${plan.duration?`<div style="font-size:11px;color:var(--muted)">${plan.duration}</div>`:''}
+        </div>
+        <div style="padding:12px 16px">`;
+      (plan.phases||[]).forEach(ph=>{
+        h+=`<div style="margin-bottom:10px">
+          <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:3px">${ph.name}${ph.time?' · '+ph.time:''}</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.55">${ph.desc}</div>
+        </div>`;
+      });
+      if(plan.tips) h+=`<div style="background:rgba(0,229,176,.06);border:1px solid rgba(0,229,176,.2);border-radius:8px;padding:10px 12px;margin-top:6px;font-size:12px;color:var(--sub);line-height:1.5">${plan.tips}</div>`;
+      h+=`</div></div>`;
+    });
+  } else {
+    h+=`<div class="sec-lbl">${L?'OPTIONS':'OPTIONS'}</div>`;
+    (c.variants||[]).forEach(v=>{h+=`<div class="cardio-var"><div class="cardio-var-hdr"><div class="cardio-var-title">${v.title}</div><div class="cardio-var-sub">${v.sub}</div></div><div class="cardio-var-detail">${v.detail}</div></div>`;});
+  }
+  return h;
+}
+
+
+
+
+// ═══════════════════════════════════════════════
+// NUTRITION VERİTABANI
+// ═══════════════════════════════════════════════
+const MEAL_DB = {
+  kahvalti: {
+    label: 'Kahvaltı', icon: '🌅', timeHint: 'Sabah 7-9',
+    options: [
+      { name: 'Yumurtalı Yulaf Bowl', kcalPer100: null, basePct: 0.22,
+        desc: '3-4 yumurta + 80g yulaf + avuç ceviz + tarçın',
+        why: 'Yulaf yavaş sindirilir, öğleye kadar enerji verir. Yumurta en kaliteli protein.',
+        tip: 'Gece hazırla (overnight oats), sabah 90sn mikrodalgada.',
+        macroRatio: {p:0.22, c:0.55, f:0.23}, tags:['kolay','yüksek protein','doyurucu'] },
+      { name: 'Süzme Peynirli Tost', kcalPer100: null, basePct: 0.20,
+        desc: '2 dilim tam buğday ekmek + 150g süzme peynir + 2 yumurta + 1 muz',
+        why: '5 dk hazır. Süzme peynir yavaş sindirilir, uzun süre tok tutar.',
+        tip: 'Yumurtaları hafta başı 6 tane haşla — her sabah hazır.',
+        macroRatio: {p:0.26, c:0.53, f:0.21}, tags:['hızlı','pratik'] },
+      { name: 'Protein Smoothie', kcalPer100: null, basePct: 0.18,
+        desc: '250ml süt + 1 muz + 2 yemek kaşığı fıstık ezmesi + 1 çorba kaşığı yulaf',
+        why: 'İştahsız sabahlar için ideal. İçerken protein alırsın.',
+        tip: 'Önceden malzemeleri hazırla, sabah 2 dk blender.',
+        macroRatio: {p:0.20, c:0.52, f:0.28}, tags:['hızlı','içecek'] },
+      { name: 'Omlet + Ekmek', kcalPer100: null, basePct: 0.20,
+        desc: '3 yumurta omlet (az zeytinyağı) + 2 dilim tam buğday ekmek + domates + salatalık',
+        why: 'Klasik ve doyurucu. Sebze ekleyince vitamin ve lif artar.',
+        tip: 'Teflon tavada yapışmaz yağ ile daha az kalorili olur.',
+        macroRatio: {p:0.28, c:0.42, f:0.30}, tags:['klasik','yüksek protein'] },
+      { name: 'Yulaf + Meyve Kasesi', kcalPer100: null, basePct: 0.17,
+        desc: '100g yulaf + 200ml süt + muz + çilek + 1 tatlı kaşığı bal',
+        why: 'Yüksek lif, doğal şeker, kolay hazırlık.',
+        tip: 'Soğuk sütla da yenilebilir, ısıtmak gerekmez.',
+        macroRatio: {p:0.14, c:0.68, f:0.18}, tags:['vegan','lif','kolay'] },
+    ]
+  },
+  ogle: {
+    label: 'Öğle Yemeği', icon: '☀️', timeHint: 'Öğlen 12-14',
+    options: [
+      { name: 'Tavuk + Pirinç Bowl', kcalPer100: null, basePct: 0.28,
+        desc: '220g ızgara tavuk göğsü + 150g pirinç pilavı + ½ avokado + salata',
+        why: 'Gram başına en yüksek protein. Avokado sağlıklı yağ ve tokluk verir.',
+        tip: 'Pazar günü 5 günlük tavuk pişir, bölüp dondur.',
+        macroRatio: {p:0.30, c:0.48, f:0.22}, tags:['yüksek protein','meal prep'] },
+      { name: 'Kıymalı Makarna', kcalPer100: null, basePct: 0.27,
+        desc: '150g tam buğday makarna + 150g yağsız dana kıyma + domates sosu',
+        why: 'Hızlı hazırlanır. Kıyma doğal kreatin ve demir içerir.',
+        tip: 'Kıymayı buzlukta tut — 10 dk pişer.',
+        macroRatio: {p:0.24, c:0.56, f:0.20}, tags:['pratik','doyurucu'] },
+      { name: 'Mercimek Çorbası + Ekmek', kcalPer100: null, basePct: 0.22,
+        desc: '2 kase kırmızı mercimek çorbası + 2 dilim tam buğday ekmek + yoğurt',
+        why: 'Bitkisel protein. Lif yüksek, uzun süre tok tutar.',
+        tip: 'Hazır çorba da olur ama tuzuna dikkat.',
+        macroRatio: {p:0.20, c:0.60, f:0.20}, tags:['bitkisel','lif','bütçe dostu'] },
+      { name: 'Ton Balıklı Salata', kcalPer100: null, basePct: 0.20,
+        desc: '2 kutu ton balığı + yeşillik + domates + salatalık + zeytinyağı + limon',
+        why: 'Sıfır pişirme, maksimum protein. Omega-3 içerir.',
+        tip: 'Ekmeksiz yersen düşük karbonhidrat versiyonu olur.',
+        macroRatio: {p:0.38, c:0.18, f:0.44}, tags:['hızlı','düşük karb','omega3'] },
+      { name: 'Köfte + Bulgur', kcalPer100: null, basePct: 0.26,
+        desc: '180g köfte (az yağlı) + 150g bulgur pilavı + cacık',
+        why: 'Dengeli makro. Bulgur pirinçten daha fazla lif ve protein içerir.',
+        tip: 'Köfteyi önceden hazırla, ızgara veya fırında pişir.',
+        macroRatio: {p:0.26, c:0.52, f:0.22}, tags:['dengeli','Türk mutfağı'] },
+    ]
+  },
+  aksam: {
+    label: 'Akşam Yemeği', icon: '🌙', timeHint: 'Akşam 18-20',
+    options: [
+      { name: 'Fırında Balık + Sebze', kcalPer100: null, basePct: 0.27,
+        desc: '250g somon veya levrek + fırın patates (2 orta) + brokoli + zeytinyağı',
+        why: 'Somon omega-3 içerir — kas toparlanmasını hızlandırır.',
+        tip: 'Hepsi aynı tepsiye, 200°C 25 dk. Tek yıkama.',
+        macroRatio: {p:0.30, c:0.38, f:0.32}, tags:['omega3','toparlanma','fırın'] },
+      { name: 'Dana Eti + Bulgur', kcalPer100: null, basePct: 0.28,
+        desc: '200g yağsız dana bonfile veya kıyma + 150g bulgur + yoğurt + salata',
+        why: 'Dana eti en iyi doğal kreatin kaynağı — kas gücü ve toparlanma.',
+        tip: 'Kıyma kullanıyorsan 10 dk pişer.',
+        macroRatio: {p:0.28, c:0.48, f:0.24}, tags:['kreatin','yüksek protein'] },
+      { name: 'Tavuk Sote + Pirinç', kcalPer100: null, basePct: 0.26,
+        desc: '200g tavuk but veya göğüs + 150g pirinç + sebze sote',
+        why: 'Yağsız protein ve karbonhidrat dengesi. Uyku öncesi sindirimi kolay.',
+        tip: 'But eti daha yağlı ama daha lezzetli — tercih senin.',
+        macroRatio: {p:0.28, c:0.50, f:0.22}, tags:['dengeli','pratik'] },
+      { name: 'Yumurtalı Sebze Kavurma', kcalPer100: null, basePct: 0.22,
+        desc: '4 yumurta + kabak + biber + soğan + domates + az zeytinyağı',
+        why: 'Düşük kalori, yüksek protein ve lif. Hafif akşam için ideal.',
+        tip: 'Kış için ıspanak, yaz için kabak veya patlıcan ekle.',
+        macroRatio: {p:0.26, c:0.28, f:0.46}, tags:['hafif','düşük karb','sebze'] },
+      { name: 'Hindi + Tatlı Patates', kcalPer100: null, basePct: 0.25,
+        desc: '200g hindi göğsü + 200g tatlı patates + brokoli veya ıspanak',
+        why: 'Hindi yüksek triptofan içerir — uyku kalitesini artırır.',
+        tip: 'Fırında 25 dk. Tatlı patates glisemik indeks açısından pirinçten iyidir.',
+        macroRatio: {p:0.30, c:0.48, f:0.22}, tags:['uyku','toparlanma'] },
+    ]
+  },
+  atistirmalik: {
+    label: 'Atıştırmalık', icon: '🥜', timeHint: 'Ara öğün / İdman etrafı',
+    options: [
+      { name: 'İdman Öncesi (60-90 dk önce)', kcalPer100: null, basePct: 0.10,
+        desc: '1 büyük muz + 1 dilim ekmek + fıstık ezmesi + sade kahve',
+        why: 'Muz hızlı karbonhidrat, kahve güç ve odak artırır.',
+        tip: 'Mide doluysa 2 saat bekle.',
+        macroRatio: {p:0.10, c:0.68, f:0.22}, tags:['idman öncesi','enerji'] },
+      { name: 'İdman Sonrası (30 dk içinde)', kcalPer100: null, basePct: 0.10,
+        desc: '250g yoğurt + 1 muz + 1 tatlı kaşığı bal',
+        why: 'Kas onarımı bu 30 dk\'da en hızlı başlar.',
+        tip: 'Whey protein varsa 1 ölçek + muz daha pratik.',
+        macroRatio: {p:0.20, c:0.68, f:0.12}, tags:['idman sonrası','toparlanma'] },
+      { name: 'Süzme Peynir + Kuruyemiş', kcalPer100: null, basePct: 0.09,
+        desc: '150g süzme peynir + avuç badem veya ceviz + tarçın',
+        why: 'Kazein proteini yavaş sindirilir, uzun süre tok tutar.',
+        tip: 'Uyumadan önce de ideal — gece kas beslenmesi.',
+        macroRatio: {p:0.28, c:0.14, f:0.58}, tags:['düşük karb','gece','kazein'] },
+      { name: 'Meyve + Yoğurt', kcalPer100: null, basePct: 0.09,
+        desc: '200g Yunan yoğurdu + mevsim meyvesi (elma, armut, çilek)',
+        why: 'Probiyotik + vitamin + protein. Hazır ve lezzetli.',
+        tip: 'Yunan yoğurdu normal yoğurttan 2 kat protein içerir.',
+        macroRatio: {p:0.24, c:0.60, f:0.16}, tags:['kolay','probiyotik'] },
+      { name: 'Protein Bar / Smoothie', kcalPer100: null, basePct: 0.09,
+        desc: '1 protein bar VEYA 200ml süt + 1 muz + tatlı kaşığı kakao',
+        why: 'Pratik ve hızlı protein. Dışarıdayken çok işe yarar.',
+        tip: 'Bar alırken şeker içeriğine bak — 5g altı ideal.',
+        macroRatio: {p:0.28, c:0.54, f:0.18}, tags:['pratik','dışarıda'] },
+    ]
+  }
+};
+
+// Günlük kaloriye göre öğün kalorisini hesapla
+function calcMealKcal(dailyKcal, mealType, mealCount) {
+  // Distribution by meal count
+  const dist = {
+    3: { kahvalti:0.28, ogle:0.38, aksam:0.34, atistirmalik:0 },
+    4: { kahvalti:0.25, ogle:0.32, aksam:0.30, atistirmalik:0.13 },
+    5: { kahvalti:0.22, ogle:0.28, aksam:0.27, atistirmalik:0.115 }
+  };
+  const d = dist[mealCount] || dist[4];
+  return Math.round(dailyKcal * (d[mealType] || 0.20));
+}
+
+// Öğün için makroları hesapla
+function calcMealMacros(mealKcal, option, totalProtein, totalCarbs, totalFat, mealCount) {
+  const ratio = option.macroRatio;
+  const p = Math.round(mealKcal * ratio.p / 4);
+  const c = Math.round(mealKcal * ratio.c / 4);
+  const f = Math.round(mealKcal * ratio.f / 9);
+  return { kcal: mealKcal, p, c, f };
+}
+
+// YENİ: Beslenme panelini render et
+function renderNutritionPanel(prog){
+  const s=prog.stats||{};
+  const a=prog.answers||{};
+  const mealCount=parseInt(a.meals)||3;
+  const kcal=s.kcal||2000;
+  const n=prog.nutrition||{};
+
+  // Calorie distribution
+  const dist={
+    3:{breakfast:.28,lunch:.38,dinner:.34,snack:0},
+    4:{breakfast:.25,lunch:.32,dinner:.30,snack:.13},
+    5:{breakfast:.22,lunch:.28,dinner:.27,snack:.115}
+  };
+  const d=dist[mealCount]||dist[4];
+  function mealKcal(type){ return Math.round(kcal*(d[type]||.20)); }
+  function mealRange(type){ const k=mealKcal(type); return `${Math.round(k*.93)}–${Math.round(k*1.07)}`; }
+
+  // Macro strip
+  let h=`<div class="macro-strip">
+    <div class="macro-chip kcal"><div class="macro-val">${kcal}</div><div class="macro-unit">kcal</div><div class="macro-lbl">Daily</div></div>
+    <div class="macro-chip"><div class="macro-val">${s.protein||'—'}g</div><div class="macro-unit">protein</div><div class="macro-lbl">Muscle</div></div>
+    <div class="macro-chip"><div class="macro-val">${s.carbs||'—'}g</div><div class="macro-unit">carbs</div><div class="macro-lbl">Energy</div></div>
+    <div class="macro-chip"><div class="macro-val">${s.fat||'—'}g</div><div class="macro-unit">fat</div><div class="macro-lbl">Hormones</div></div>
+  </div>
+  <div class="nutr-body">`;
+
+  // Target weight box
+  if(s.targetWeight&&s.weightDiff!==null){
+    const dir=s.weightDiff>=0?'to gain':'to lose';
+    h+=`<div class="nutr-strategy" style="border-left-color:var(--accent2)">
+      <div class="nutr-strat-lbl">⚖️ TARGET WEIGHT</div>
+      <div class="nutr-strat-txt"><strong>${s.targetWeight} kg</strong> — ${Math.abs(s.weightDiff)} kg ${dir}${s.weeksToGoal?` · ~${s.weeksToGoal} weeks to goal`:''}</div>
+    </div>`;
+  }
+
+  // Strategy
+  if(n.strategy) h+=`<div class="nutr-strategy"><div class="nutr-strat-lbl">⚡ NUTRITION STRATEGY</div><div class="nutr-strat-txt">${n.strategy}</div></div>`;
+
+  // Meal types
+  const mealSeq=mealCount===3?['breakfast','lunch','dinner']
+    :mealCount===4?['breakfast','lunch','dinner','snack']
+    :['breakfast','snack','lunch','dinner','snack'];
+
+  const mealMeta={
+    breakfast:{label:'Breakfast',time:'7–9 AM',icon:'🌅'},
+    lunch:{label:'Lunch',time:'12–2 PM',icon:'☀️'},
+    dinner:{label:'Dinner',time:'6–8 PM',icon:'🌙'},
+    snack:{label:'Snack',time:'Around workout',icon:'🥜'},
+  };
+
+  h+=`<div class="sec-label">DAILY MEALS — Tap to see alternatives</div>`;
+
+  const snackCount={n:0};
+  mealSeq.forEach((type,idx)=>{
+    const db=MEAL_DB[type];
+    if(!db) return;
+    const si=type==='snack'?snackCount.n++:0;
+    const opt=db.opts[si%db.opts.length];
+    const mk=mealKcal(type);
+    const mr=mealRange(type);
+    const mp=Math.round(mk*opt.macroR.p/4);
+    const mc=Math.round(mk*opt.macroR.c/4);
+    const mf=Math.round(mk*opt.macroR.f/9);
+    const meta=mealMeta[type]||{label:type,time:'',icon:'🍽️'};
+    const isEveningSnack=type==='snack'&&si>0;
+
+    h+=`<div class="meal-card" onclick="openMealModal('${type}',${mk},${si})">
+      <div class="meal-card-hdr">
+        <div class="meal-icon">${meta.icon}</div>
+        <div class="meal-info">
+          <div class="meal-label">${isEveningSnack?'Evening Snack':meta.label}</div>
+          <div class="meal-time">${meta.time}</div>
+        </div>
+        <div class="meal-kcal-box">
+          <div class="meal-kcal-num">${mk}</div>
+          <div class="meal-kcal-range">${mr} kcal</div>
+        </div>
+        <div class="meal-arrow">›</div>
+      </div>
+      <div class="meal-preview">
+        <div class="meal-preview-name">${opt.name}</div>
+        <div class="meal-preview-desc">${opt.desc}</div>
+        <div class="macro-pills">
+          <span class="mpill mpill-p">P: ${mp}g</span>
+          <span class="mpill mpill-c">C: ${mc}g</span>
+          <span class="mpill mpill-f">F: ${mf}g</span>
+          <span class="mpill mpill-k">${mk} kcal</span>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  if(n.supplements){
+    h+=`<div class="sec-label">SUPPLEMENTS</div>
+      <div class="nutr-strategy" style="border-left-color:var(--accent3)">
+        <div class="nutr-strat-txt" style="white-space:pre-line">${n.supplements}</div>
+      </div>`;
+  }
+  h+='</div>';
+  return h;
+}
+
+function openMealModal(type,mealKcal,snackOffset){
+  const db=MEAL_DB[type];
+  if(!db) return;
+  const mealMeta={breakfast:{label:'Breakfast'},lunch:{label:'Lunch'},dinner:{label:'Dinner'},snack:{label:'Snack'}};
+  const meta=mealMeta[type]||{label:type};
+  const modalTitle=document.getElementById('mealModalTitle')||document.getElementById('swapTitle');
+  const modalSub=document.getElementById('mealModalSub')||document.getElementById('swapSub');
+  const modalContent=document.getElementById('mealModalContent')||document.getElementById('swapContent');
+  const modal=document.getElementById('mealModal')||document.getElementById('swapModal');
+  if(!modal) return;
+  if(modalTitle) modalTitle.textContent=db.icon+' '+meta.label+' Options';
+  if(modalSub) modalSub.textContent=`${mealKcal} kcal · Tap any option to view`;
+  let h='';
+  db.opts.forEach(opt=>{
+    const mp=Math.round(mealKcal*opt.macroR.p/4);
+    const mc=Math.round(mealKcal*opt.macroR.c/4);
+    const mf=Math.round(mealKcal*opt.macroR.f/9);
+    const tagHtml=(opt.tags||[]).map(tg=>`<span class="meal-tag">${tg}</span>`).join('');
+    h+=`<div class="meal-alt" onclick="closeAllModals()">
+      <div class="meal-alt-name">${opt.name}</div>
+      <div class="meal-alt-desc">${opt.desc}</div>
+      <div class="meal-alt-why"><strong>Why:</strong> ${opt.why}</div>
+      <div class="meal-alt-tip">💡 ${opt.tip}</div>
+      <div class="macro-pills" style="margin-bottom:8px">
+        <span class="mpill mpill-p">P: ${mp}g</span>
+        <span class="mpill mpill-c">C: ${mc}g</span>
+        <span class="mpill mpill-f">F: ${mf}g</span>
+        <span class="mpill mpill-k">${mealKcal} kcal</span>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">${tagHtml}</div>
+    </div>`;
+  });
+  if(modalContent) modalContent.innerHTML=h;
+  modal.classList.add('open');
+}
+
+function closeAllModals(){
+  ['settingsModal','editModal','swapModal','mealModal','legalModal'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.remove('open');
+  });
+}
+
+function closeMealModal(){ closeAllModals(); }
+
+// Öğün alternatifleri modal'ı
+let _mealModalType = null, _mealModalKcal = 0, _mealModalIdx = 0;
+
+function openMealAlts(cardIdx, mealType, mealKcal, snackOffset) {
+  _mealModalType = mealType;
+  _mealModalKcal = mealKcal;
+  _mealModalIdx = cardIdx;
+  const mealDb = MEAL_DB[mealType];
+  const prog_s = program?.stats || {};
+
+  let h = `<div class="modal-title">${mealDb.icon} ${mealDb.label} Alternatifleri</div>
+    <div class="modal-sub">${mealKcal} kcal · ${mealDb.timeHint}</div>`;
+
+  mealDb.options.forEach((opt, i) => {
+    const macros = calcMealMacros(mealKcal, opt, prog_s.protein, prog_s.carbs, prog_s.fat, parseInt(program?.answers?.meals)||3);
+    const tagHtml = opt.tags.map(t=>`<span class="meal-tag">${t}</span>`).join('');
+    h += `<div class="swap-ex" onclick="closeMealModal()" style="margin-bottom:10px">
+      <div class="swap-ex-top" style="margin-bottom:4px">
+        <div class="swap-ex-name"><strong>${opt.name}</strong></div>
+      </div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:6px">${opt.desc}</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:4px"><strong style="color:var(--text)">Neden:</strong> ${opt.why}</div>
+      <div style="font-size:12px;color:var(--accent2);margin-bottom:8px">💡 ${opt.tip}</div>
+      <div class="meal-macro-pills" style="margin-bottom:6px">
+        <span class="mpill mpill-p">P: ${macros.p}g</span>
+        <span class="mpill mpill-c">K: ${macros.c}g</span>
+        <span class="mpill mpill-f">Y: ${macros.f}g</span>
+        <span class="mpill" style="background:var(--surf2);color:var(--muted)">${macros.kcal} kcal</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${tagHtml}</div>
+    </div>`;
+  });
+
+  document.getElementById('mealAltsContent').innerHTML = h;
+  document.getElementById('mealAltsModal').classList.add('open');
+}
+
+function closeMealAlts() {
+  const m = document.getElementById('mealAltsModal');
+  if(m) m.classList.remove('open');
+  const m2 = document.getElementById('mealModal');
+  if(m2) m2.classList.remove('open');
+}
+
+function renderProfilePanel(prog){
+  const a=prog.answers||{}, s=prog.stats||{};
+  const bmiCat=s.bmi<18.5?'Underweight':s.bmi<25?'Normal ✅':s.bmi<30?'Overweight':'Obese';
+  const bmiColor=s.bmi<18.5?'var(--warn)':s.bmi<25?'var(--done)':s.bmi<30?'var(--warn)':'var(--accent3)';
+  const L=appLang==='tr';
+
+  const goalNames={bulk:L?'Kas & Hacim':'Build Muscle',cut:L?'Yağ Yak':'Burn Fat',
+    gain_weight:L?'Kilo Al':'Gain Weight',lose_weight:L?'Kilo Ver':'Lose Weight',
+    recomp:'Recomposition',maintain:L?'Formda Kal':'Stay Fit'};
+  const levelNames={beginner:'Beginner',intermediate:'Intermediate',advanced:'Advanced'};
+  const eqNames={gym:'Full Gym',cables:'Cable Gym',dumbbells:'Home Dumbbells',none:'Bodyweight'};
+  const intNames={light:'Short (~4 ex)',medium:'Balanced (~6 ex)',heavy:'Full (~8 ex)'};
+  const cardioNames={run:'Running',hiit:'HIIT',walk:'Walking',bike:'Cycling',swim:'Swimming',none:'None'};
+  const sleepNames={poor:'< 5h ⚠️',low:'5-6h ⚠️',ok:'7-8h ✅',great:'8h+ ✅'};
+  const actNames={sedentary:'Sedentary (desk job)',light:'Lightly Active',moderate:'Moderately Active',very_active:'Very Active'};
+
+  let h=`<div style="padding:20px">
+    <div class="ai-badge">✨ AI Generated Program</div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val">${a.height||'—'}</div><div class="stat-lbl">Height cm</div></div>
+      <div class="stat-card"><div class="stat-val">${a.weight||'—'}</div><div class="stat-lbl">Weight kg</div></div>
+      <div class="stat-card"><div class="stat-val">${a.age||'—'}</div><div class="stat-lbl">Age</div></div>
+    </div>`;
+
+  if(s.targetWeight){
+    h+=`<div class="stat-row" style="grid-template-columns:1fr 1fr">
+      <div class="stat-card"><div class="stat-val">${s.targetWeight}</div><div class="stat-lbl">Target kg</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">${s.weeksToGoal?'~'+s.weeksToGoal+' wk':'—'}</div><div class="stat-lbl">Est. Time</div></div>
+    </div>`;
+  }
+
+  const rows=[
+    ['Name', a.name||'—', false],
+    ['Goal', goalNames[a.goal]||a.goal||'—', false],
+    ['Level', levelNames[a.level]||a.level||'—', false],
+    ['Intensity', intNames[a.intensity]||a.intensity||'—', false],
+    ['Training', (a.days||'—')+' days/week', false],
+    ['Equipment', eqNames[a.equipment]||a.equipment||'—', false],
+    ['Cardio', cardioNames[a.cardio]||a.cardio||'—', false],
+    ['Sleep', sleepNames[a.sleep]||a.sleep||'—', false],
+    ['Daily Activity', actNames[a.activity_level]||a.activity_level||'—', false],
+    ['BMI', `${s.bmi||'—'} — <span style="color:${bmiColor}">${bmiCat}</span>`, true],
+    ['Lean Mass', `~${s.leanMass||'—'} kg`, false],
+    ['TDEE', `${s.tdee||'—'} kcal/day`, false],
+    ['Daily Calories', `${s.kcal||'—'} kcal`, true],
+    ['Protein Target', `${s.protein||'—'}g / day`, false],
+  ];
+
+  h+=`<div class="profile-card">`;
+  rows.forEach(([key,val,hl])=>{
+    h+=`<div class="profile-row"><span class="profile-key">${key}</span><span class="profile-val${hl?' highlight':''}">${val}</span></div>`;
+  });
+  h+=`</div>`;
+
+  // Focus muscles badge
+  const fm=a.focus_muscles||[];
+  if(fm.length>0&&!fm.includes('balanced')){
+    h+=`<div class="tip" style="margin-top:10px"><div class="tip-lbl">🎯 FOCUS MUSCLES</div><div class="tip-txt">${fm.map(m=>m.charAt(0).toUpperCase()+m.slice(1)).join(' · ')}</div></div>`;
+  }
+
+  h+=`<div class="disclaimer" style="margin-top:12px">
+    <div class="disclaimer-title">⚠️ IMPORTANT NOTICE</div>
+    This program is AI-generated based on general fitness principles. It is not medical advice. Consult a qualified professional before starting any exercise or diet program.
+  </div>`;
+
+  h+=`<div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:12px 0">
+    <button class="footer-link" onclick="openLegal('terms')">Terms</button>
+    <button class="footer-link" onclick="openLegal('disclaimer')">Disclaimer</button>
+    <button class="footer-link" onclick="openLegal('privacy')">Privacy</button>
+  </div>
+  <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px">Use ⚙️ to make changes</div>
+  </div>`;
+  return h;
+}
+
+// ═══════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════
+function openSettings(){document.getElementById('settingsModal').classList.add('open');}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('open');}
+function closeModalBg(e){if(e.target===e.currentTarget)e.currentTarget.classList.remove('open');}
+
+function fullReset(){
+  const msg=appLang==='tr'?'Tüm veriler silinecek. Emin misin?':'All data will be deleted. Are you sure?';
+  if(!confirm(msg))return;
+  // Close modal first
+  document.getElementById('settingsModal').classList.remove('open');
+  // Clear all storage
+  localStorage.removeItem('ak_v5');
+  localStorage.removeItem('ait_lang');
+  // Reset state
+  program=null; answers={}; currentStep=0; appLang='en';
+  // Update lang button
+  const lb=document.getElementById('langLabel');
+  if(lb) lb.textContent='EN';
+  // Show lang selection screen after brief delay to let modal close
+  setTimeout(()=>showScreen('s-lang'), 50);
+}
+
+const EDIT_DEFS={
+  goal:{type:'single',q:'Change Goal',opts:()=>[
+    {v:'bulk',label:'Build Muscle & Size',sub:'+350 kcal'},
+    {v:'cut',label:'Burn Fat & Keep Muscle',sub:'-450 kcal'},
+    {v:'gain_weight',label:'Gain Weight',sub:'+500 kcal'},
+    {v:'lose_weight',label:'Lose Weight',sub:'-600 kcal'},
+    {v:'recomp',label:'Recomposition',sub:'Maintenance calories'},
+    {v:'maintain',label:'Stay Fit'},
+  ]},
+  intensity:{type:'single',q:'Workout Intensity',opts:()=>[
+    {v:'light',label:'Short & Focused',sub:'~4 exercises, 30-40 min'},
+    {v:'medium',label:'Balanced',sub:'~6 exercises, 45-60 min'},
+    {v:'heavy',label:'Full Session',sub:'~8 exercises, 60-75 min'},
+  ]},
+  days:{type:'single',q:'Training Days',opts:()=>[
+    {v:'2',label:'2 Days'},{v:'3',label:'3 Days'},
+    {v:'4',label:'4 Days'},{v:'5',label:'5 Days'},
+  ]},
+  equipment:{type:'single',q:'Equipment',opts:()=>[
+    {v:'gym',label:'Full Gym',sub:'Cables, barbell, machines, dumbbells'},
+    {v:'cables',label:'Cable-Focused Gym',sub:'Cables + dumbbells, no barbell'},
+    {v:'dumbbells',label:'Home Dumbbells',sub:'Free weights only'},
+    {v:'none',label:'Bodyweight Only'},
+  ]},
+  cardio:{type:'single',q:'Cardio Type',opts:()=>[
+    {v:'run',label:'Running'},{v:'hiit',label:'HIIT'},
+    {v:'walk',label:'Walking'},{v:'bike',label:'Cycling'},
+    {v:'swim',label:'Swimming'},{v:'none',label:'No Cardio'},
+  ]},
+  meals:{type:'single',q:'Meals per Day',opts:()=>[
+    {v:'3',label:'3 Meals'},{v:'4',label:'4 Meals'},{v:'5',label:'5 Meals'},
+  ]},
+  target_weight:{type:'text',q:'Target Weight',fields:[
+    {id:'target_weight',label:'Target Weight (kg)',placeholder:'e.g. 75',inputmode:'decimal'}
+  ]},
+  body:{type:'text',q:'Update Height & Weight',fields:[
+    {id:'height',label:'Height (cm)',placeholder:'175',inputmode:'decimal',min:100,max:250},
+    {id:'weight',label:'Weight (kg)',placeholder:'75',inputmode:'decimal',min:30,max:300},
+  ]},
+};
+
+function editSingle(key){
+  editKey=key;editAnswers={...answers};
+  closeSettings();
+  const def=EDIT_DEFS[key];
+  let h=`<div class="modal-title">${def.q}</div><div style="height:12px"></div>`;
+  if(def.type==='single'){
+    h+='<div class="opts">';
+    def.opts.forEach(o=>{const sel=editAnswers[key]===o.v?'selected':'';h+=`<button class="opt ${sel}" onclick="editSelectOpt('${key}','${o.v}',this)"><div class="opt-check">${sel?'✓':''}</div><div><div class="opt-label">${o.label}</div>${o.sub?`<div class="opt-sub">${o.sub}</div>`:''}</div></button>`;});
+    h+='</div>';
+  }else{
+    h+='<div class="inp-row">';
+    def.fields.forEach(f=>{h+=`<div class="inp-field"><label class="inp-label">${f.label}</label><input class="inp" id="edit_${f.id}" type="text" inputmode="${f.inputmode}" placeholder="${f.placeholder}" value="${editAnswers[f.id]||''}"></div>`;});
+    h+='</div>';
+  }
+  document.getElementById('editContent').innerHTML=h;
+  document.getElementById('editSaveBtn').disabled=(def.type==='single');
+  document.getElementById('editModal').classList.add('open');
+}
+
+function editSelectOpt(key,val,btn){
+  editAnswers[key]=val;
+  document.querySelectorAll('#editContent .opt').forEach(b=>{b.classList.remove('selected');b.querySelector('.opt-check').textContent='';});
+  btn.classList.add('selected');btn.querySelector('.opt-check').textContent='✓';
+  document.getElementById('editSaveBtn').disabled=false;
+}
+
+function closeEdit(){document.getElementById('editModal').classList.remove('open');}
+
+function saveEdit(){
+  const def=EDIT_DEFS[editKey];
+  if(def.type==='text'){def.fields.forEach(f=>{const el=document.getElementById('edit_'+f.id);if(el&&el.value.trim())editAnswers[f.id]=el.value.trim();});}
+  Object.assign(answers,editAnswers);
+  program=buildProgram(answers);
+  localStorage.setItem('ak_v5',JSON.stringify(program));
+  closeEdit();loadApp();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+checkExisting();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+</script>
+<!-- MEAL ALTERNATIVES MODAL -->
+<div class="modal-overlay" id="mealModal" onclick="closeModalBg(event)">
+  <div class="modal">
+    <div class="modal-title" id="mealModalTitle">Meal Options</div>
+    <div class="modal-sub" id="mealModalSub"></div>
+    <div id="mealModalContent"></div>
+    <button class="modal-cancel" style="margin-top:12px" onclick="closeMealModal()">Kapat</button>
+  </div>
+</div>
+
+</body>
+</html>
