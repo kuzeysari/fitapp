@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AiTrainer">
 <meta name="theme-color" content="#0a0a0a">
-<meta name="description" content="Astrokuzey — Kişiselleştirilmiş fitness uygulaması. Ücretsiz, internet gerekmez.">
+<meta name="description" content="AiTrainer — Your AI-powered personal fitness coach. Free, works offline.">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <title>AiTrainer — AI Personal Fitness Coach</title>
@@ -41,7 +41,6 @@ body{
   .icon-btn.lang-btn,.icon-btn#settingsBtn{width:100%;justify-content:flex-start;padding:0 14px;gap:8px;touch-action:manipulation}
   .hdr-divider{display:block}
   .app-main{grid-column:2;grid-row:1/3;overflow-y:auto;max-width:none}
-  .screen{max-width:none}
   .onboard,.wizard,.gen-screen-inner{max-width:var(--max-w);margin:0 auto;padding:40px 32px}
   .panel{max-width:var(--max-w);margin:0 auto}
   .tabs{justify-content:flex-start;padding:0 32px;max-width:calc(var(--max-w) + 64px);margin:0 auto}
@@ -360,14 +359,14 @@ body{
   <div class="hdr-left">
     <div class="hdr-tag">AI Personal Fitness Coach</div>
     <div class="hdr-title" style="font-size:clamp(26px,6vw,44px)"><span style="color:var(--accent)">Ai</span>Trainer</div>
-    <div class="hdr-tagline">Kişiselleştirilmiş antrenman ve<br>beslenme programı oluşturucu</div>
+    <div class="hdr-tagline">Personalized workout & nutrition<br>powered by AI</div>
   </div>
   <!-- Desktop nav (visible only on PC) -->
   <nav class="hdr-nav" id="desktopNav" style="display:none"></nav>
   <div class="hdr-divider"></div>
   <div class="hdr-right">
-    <button class="icon-btn lang-btn" id="langBtn" onclick="toggleLang()">🌐 TR</button>
-    <button class="icon-btn" id="settingsBtn" onclick="openSettings()">⚙️ Settings</button>
+    <button class="icon-btn lang-btn" id="langBtn" onclick="toggleLang()">🌐 EN</button>
+    <button class="icon-btn" id="settingsBtn" onclick="openSettings()" style="display:none">⚙️ Settings</button>
   </div>
 </header>
 
@@ -410,7 +409,7 @@ body{
       <div class="feat"><div class="feat-icon">💾</div><div class="feat-title">Saved Locally</div><div class="feat-sub">No account needed</div></div>
     </div>
     <button class="start-btn" onclick="startWizard()">Build My Program →</button>
-    <div class="legal-note">By continuing you accept our <button class="footer-link" onclick="event.stopPropagation();openLegal('terms')">Terms of Use</button>'nı ve <button class="footer-link" onclick="event.stopPropagation();openLegal('disclaimer')">Disclaimer</button>'ni kabul . AI-generated content — not medical advice.</div>
+    <div class="legal-note">By continuing you accept our <button class="footer-link" onclick="event.stopPropagation();openLegal('terms')">Terms</button> &amp; <button class="footer-link" onclick="event.stopPropagation();openLegal('disclaimer')">Disclaimer</button>. AI-generated — not medical advice.</div>
   </div>
 </div>
 
@@ -516,51 +515,54 @@ function muscleName(n){return appLang==='tr'?(TR[n]||n):n;}
 
 
 // ═══════════════════════════════════════════════
-// YASAL METİNLER
+// LEGAL TEXTS
 // ═══════════════════════════════════════════════
 function openLegal(type){
+  const L=appLang==='tr';
   const texts={
-    disclaimer:`<div class="modal-title">⚠️ Disclaimer</div>
+    disclaimer:`<div class="modal-title">⚠️ ${L?'Sorumluluk Reddi':'Disclaimer'}</div>
       <div class="legal-content">
-        <h3>Tıbbi Tavsiye Değildir</h3>
-        <p>Astrokuzey tarafından sunulan antrenman programları, beslenme planları ve kalori hesaplamaları <strong>genel bilgilendirme amaçlıdır</strong> ve herhangi bir tıbbi tavsiye, teşhis veya tedavi yerine geçmez.</p>
-        <h3>Yapay Zeka ile Oluşturulmuştur</h3>
-        <p>Bu uygulama tarafından oluşturulan programlar <strong>yapay zeka algoritmaları</strong> kullanılarak genel fitness prensipleri doğrultusunda hazırlanmaktadır. Bireysel sağlık durumunuzu, tıbbi geçmişinizi veya özel ihtiyaçlarınızı dikkate almaz.</p>
-        <h3>Kullanıcı Sorumluluğu</h3>
-        <p>Herhangi bir egzersiz veya diyet programına başlamadan önce <strong>bir doktor veya uzman diyetisyenle görüşmenizi</strong> öneririz. Uygulanan programdan doğacak her türlü sonuç kullanıcının kendi sorumluluğundadır.</p>
-        <h3>Sağlık Uyarısı</h3>
-        <p>Kronik hastalığınız, yaralanmanız veya sağlık probleminiz varsa bu uygulamayı kullanmadan önce sağlık uzmanınıza danışın. Egzersiz sırasında ağrı veya rahatsızlık hissederseniz hemen durdurun.</p>
-        <p><strong>Astrokuzey ve geliştiricileri, bu uygulama kullanımından kaynaklanabilecek herhangi bir zarar, kayıp veya sağlık sorunlarından sorumlu tutulamaz.</strong></p>
+        <h3>${L?'Tıbbi Tavsiye Değildir':'Not Medical Advice'}</h3>
+        <p>${L?'AiTrainer tarafından sunulan antrenman programları, beslenme planları ve kalori hesaplamaları genel bilgilendirme amaçlıdır ve herhangi bir tıbbi tavsiye, teşhis veya tedavi yerine geçmez.':'Workout programs, nutrition plans, and calorie calculations provided by AiTrainer are for general informational purposes only and do not constitute medical advice, diagnosis, or treatment.'}</p>
+        <h3>${L?'Yapay Zeka ile Oluşturulmuştur':'AI-Generated Content'}</h3>
+        <p>${L?'Bu uygulama tarafından oluşturulan programlar yapay zeka algoritmaları kullanılarak genel fitness prensipleri doğrultusunda hazırlanmaktadır. Bireysel sağlık durumunuzu veya özel ihtiyaçlarınızı dikkate almaz.':'Programs generated by this app are created using AI algorithms based on general fitness principles. They do not account for your individual health status or specific needs.'}</p>
+        <h3>${L?'Kullanıcı Sorumluluğu':'User Responsibility'}</h3>
+        <p>${L?'Herhangi bir egzersiz veya diyet programına başlamadan önce bir doktor veya uzman diyetisyenle görüşmenizi öneririz. Uygulanan programdan doğacak her türlü sonuç kullanıcının kendi sorumluluğundadır.':'We recommend consulting a doctor or registered dietitian before starting any exercise or diet program. All results from using this app are the sole responsibility of the user.'}</p>
+        <h3>${L?'Sağlık Uyarısı':'Health Warning'}</h3>
+        <p>${L?'Kronik hastalığınız, yaralanmanız veya sağlık probleminiz varsa bu uygulamayı kullanmadan önce sağlık uzmanınıza danışın. Egzersiz sırasında ağrı veya rahatsızlık hissederseniz hemen durdurun.':'If you have a chronic illness, injury, or health condition, consult your healthcare provider before using this app. Stop immediately if you experience pain or discomfort during exercise.'}</p>
+        <p><strong>AiTrainer ${L?'ve geliştiricileri, bu uygulama kullanımından kaynaklanabilecek herhangi bir zarar, kayıp veya sağlık sorunlarından sorumlu tutulamaz.':'and its developers cannot be held liable for any harm, loss, or health issues that may arise from using this application.'}</strong></p>
       </div>
-      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">Anladım</button>`,
-    terms:`<div class="modal-title">📋 Terms of Use</div>
+      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">${L?'Anladım':'Got it'}</button>`,
+
+    terms:`<div class="modal-title">📋 ${L?'Kullanım Koşulları':'Terms of Use'}</div>
       <div class="legal-content">
-        <h3>Kabul</h3>
-        <p>Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.</p>
-        <h3>Kullanım Amacı</h3>
-        <p>Astrokuzey yalnızca <strong>kişisel, ticari olmayan</strong> amaçlarla kullanılabilir. Uygulama içeriğinin izinsiz kopyalanması, dağıtılması veya ticari amaçlarla kullanılması yasaktır.</p>
-        <h3>Yapay Zeka Kullanımı</h3>
-        <p>Programlar yapay zeka ile oluşturulur. <strong>Sonuçların doğruluğu garanti edilmez.</strong> Kullanıcı, oluşturulan programları kendi takdirine ve uzman görüşüne göre değerlendirmelidir.</p>
-        <h3>Veri Gizliliği</h3>
-        <p>Girdiğiniz boy, kilo, yaş gibi veriler <strong>yalnızca cihazınızda saklanır</strong> (localStorage). Sunucuya gönderilmez, üçüncü taraflarla paylaşılmaz.</p>
-        <h3>Değişiklikler</h3>
-        <p>Bu koşullar önceden bildirim yapılmaksızın güncellenebilir. Uygulamayı kullanmaya devam etmek güncel koşulları kabul etmek anlamına gelir.</p>
-        <h3>Sorumluluk Sınırı</h3>
-        <p>Uygulama "olduğu gibi" sunulmaktadır. Geliştiriciler, kullanımdan doğabilecek doğrudan veya dolaylı zararlardan sorumlu değildir.</p>
+        <h3>${L?'Kabul':'Acceptance'}</h3>
+        <p>${L?'Bu uygulamayı kullanarak aşağıdaki koşulları kabul etmiş sayılırsınız.':'By using this application, you agree to the following terms.'}</p>
+        <h3>${L?'Kullanım Amacı':'Permitted Use'}</h3>
+        <p>${L?'AiTrainer yalnızca kişisel, ticari olmayan amaçlarla kullanılabilir. Uygulama içeriğinin izinsiz kopyalanması, dağıtılması veya ticari amaçlarla kullanılması yasaktır.':'AiTrainer may only be used for personal, non-commercial purposes. Unauthorized copying, distribution, or commercial use of app content is prohibited.'}</p>
+        <h3>${L?'Yapay Zeka Kullanımı':'AI Usage'}</h3>
+        <p>${L?'Programlar yapay zeka ile oluşturulur. Sonuçların doğruluğu garanti edilmez. Kullanıcı, oluşturulan programları kendi takdirine ve uzman görüşüne göre değerlendirmelidir.':'Programs are generated by AI. Accuracy of results is not guaranteed. Users should evaluate generated programs using their own judgment and expert advice.'}</p>
+        <h3>${L?'Veri Gizliliği':'Data Privacy'}</h3>
+        <p>${L?'Girdiğiniz boy, kilo, yaş gibi veriler yalnızca cihazınızda saklanır (localStorage). Sunucuya gönderilmez, üçüncü taraflarla paylaşılmaz.':'Data you enter (height, weight, age, etc.) is stored only on your device (localStorage). It is never sent to a server or shared with third parties.'}</p>
+        <h3>${L?'Değişiklikler':'Changes'}</h3>
+        <p>${L?'Bu koşullar önceden bildirim yapılmaksızın güncellenebilir.':'These terms may be updated without prior notice.'}</p>
+        <h3>${L?'Sorumluluk Sınırı':'Limitation of Liability'}</h3>
+        <p>${L?'Uygulama "olduğu gibi" sunulmaktadır. Geliştiriciler, kullanımdan doğabilecek doğrudan veya dolaylı zararlardan sorumlu değildir.':'The app is provided "as is". Developers are not liable for any direct or indirect damages arising from its use.'}</p>
       </div>
-      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">Anladım</button>`,
-    privacy:`<div class="modal-title">🔒 Privacy Policy Politikası</div>
+      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">${L?'Anladım':'Got it'}</button>`,
+
+    privacy:`<div class="modal-title">🔒 ${L?'Gizlilik Politikası':'Privacy Policy'}</div>
       <div class="legal-content">
-        <h3>Toplanan Veriler</h3>
-        <p>Astrokuzey yalnızca sizin girdiğiniz verileri (boy, kilo, yaş, hedef vb.) işler. Bu veriler <strong>cihazınızda localStorage'da saklanır.</strong></p>
-        <h3>Veri Paylaşımı</h3>
-        <p>Verileriniz hiçbir sunucuya gönderilmez, üçüncü taraflarla paylaşılmaz, reklam amacıyla kullanılmaz.</p>
-        <h3>Veri Silme</h3>
-        <p>Ayarlar menüsündeki "Tamamen Sıfırla" butonu ile tüm verilerinizi istediğiniz zaman silebilirsiniz. Tarayıcı önbelleğini temizlemek de tüm verileri siler.</p>
-        <h3>Çerezler</h3>
-        <p>Bu uygulama çerez (cookie) kullanmaz. Yalnızca localStorage kullanılır.</p>
+        <h3>${L?'Toplanan Veriler':'Data Collected'}</h3>
+        <p>${L?'AiTrainer yalnızca sizin girdiğiniz verileri (boy, kilo, yaş, hedef vb.) işler. Bu veriler cihazınızda localStorage da saklanır.':'AiTrainer only processes data you enter (height, weight, age, goal, etc.). This data is stored in your device localStorage.'}</p>
+        <h3>${L?'Veri Paylaşımı':'Data Sharing'}</h3>
+        <p>${L?'Verileriniz hiçbir sunucuya gönderilmez, üçüncü taraflarla paylaşılmaz, reklam amacıyla kullanılmaz.':'Your data is never sent to any server, shared with third parties, or used for advertising.'}</p>
+        <h3>${L?'Veri Silme':'Data Deletion'}</h3>
+        <p>${L?'Settings menüsündeki Full Reset butonu ile tüm verilerinizi istediğiniz zaman silebilirsiniz.':'Use the Full Reset button in Settings to delete all your data at any time.'}</p>
+        <h3>${L?'Çerezler':'Cookies'}</h3>
+        <p>${L?'Bu uygulama çerez kullanmaz. Yalnızca localStorage kullanılır.':'This app does not use cookies. Only localStorage is used.'}</p>
       </div>
-      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">Anladım</button>`
+      <button class="modal-cancel" style="margin-top:16px" onclick="closeLegal()">${L?'Anladım':'Got it'}</button>`
   };
   document.getElementById('legalContent').innerHTML=texts[type]||texts.disclaimer;
   document.getElementById('legalModal').classList.add('open');
@@ -764,7 +766,7 @@ const STEPS=[
 ];
 
 // ═══════════════════════════════════════════════
-// EGZERSİZ VERİTABANI
+// EXERCISE DATABASE
 // ═══════════════════════════════════════════════
 const DB={
   push:{
@@ -1096,7 +1098,7 @@ function buildProgram(a){
 
   const focuses={
     2:[L?'İTİŞ — Göğüs · Omuz · Triceps':'PUSH — Chest · Shoulder · Triceps',
-       L?'ÇEKİŞ & ALT VÜCUT':'PULL & LOWER BODY'],
+       L?'PULL & LOWER BODY':'PULL & LOWER BODY'],
     3:[L?'İTİŞ — Göğüs · Omuz · Triceps':'PUSH — Chest · Shoulder · Triceps',
        L?'ÇEKİŞ — Sırt · Biceps':'PULL — Back · Biceps',
        L?'ALT VÜCUT & CORE':'LOWER BODY & CORE'],
@@ -1104,8 +1106,8 @@ function buildProgram(a){
        L?'LOWER A — Ön Bacak':'LOWER A — Quad Focus',
        L?'UPPER B — Çekiş':'UPPER B — Pull',
        L?'LOWER B — Arka Bacak':'LOWER B — Hamstring Focus'],
-    5:[L?'GÖĞÜS & TRİCEPS':'CHEST & TRICEPS',
-       L?'SIRT & BİCEPS':'BACK & BICEPS',
+    5:[L?'CHEST & TRICEPS':'CHEST & TRICEPS',
+       L?'BACK & BICEPS':'BACK & BICEPS',
        L?'BACAK':'LEGS',
        L?'OMUZ & CORE':'SHOULDERS & CORE',
        L?'FULL BODY PUMP':'FULL BODY PUMP']
@@ -1254,8 +1256,8 @@ function mkDay(num,dayName,focus,sections,a,intensity,dbEq,focusMuscles,injuries
     .replace('LOWER A — Ön Bacak','LOWER A — Quad Focus')
     .replace('UPPER B — Çekiş','UPPER B — Pull')
     .replace('LOWER B — Arka Bacak','LOWER B — Hamstring Focus')
-    .replace('GÖĞÜS & TRİCEPS','CHEST & TRICEPS')
-    .replace('SIRT & BİCEPS','BACK & BICEPS')
+    .replace('CHEST & TRICEPS','CHEST & TRICEPS')
+    .replace('BACK & BICEPS','BACK & BICEPS')
     .replace('BACAK','LEGS')
     .replace('OMUZ & CORE','SHOULDERS & CORE')
     .replace('FULL BODY PUMP','FULL BODY PUMP');
@@ -1570,8 +1572,14 @@ function openLangSwitch(){
 function setLang(l){
   appLang=l;
   localStorage.setItem('ait_lang',l);
-  const lb=document.getElementById('langLabel');
-  if(lb)lb.textContent=l.toUpperCase();
+  // Update all possible lang button elements
+  ['langLabel','langBtn','langBtnTop','langBtnSide'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){
+      if(id==='langLabel') el.textContent=l.toUpperCase();
+      else el.textContent='🌐 '+l.toUpperCase();
+    }
+  });
   // If on lang screen, go to onboard
   if(document.getElementById('s-lang').classList.contains('active')){
     showScreen('s-onboard');
@@ -1799,11 +1807,11 @@ function showScreen(id){
   const target=document.getElementById(id);
   if(target) target.classList.add('active');
   // topbar settings button
-  const sb=document.getElementById('settingsBtn-top');
-  if(sb) sb.style.display=id==='s-app'?'flex':'none';
-  // sidebar settings button
-  const sb2=document.getElementById('settingsBtn-side');
-  if(sb2) sb2.style.display=id==='s-app'?'flex':'none';
+  // Show/hide settings button based on screen
+  ['settingsBtn','settingsBtn-top','settingsBtn-side'].forEach(bid=>{
+    const sb=document.getElementById(bid);
+    if(sb) sb.style.display=id==='s-app'?'flex':'none';
+  });
   if(typeof updateDesktopNav==='function') updateDesktopNav(id);
 }
 
